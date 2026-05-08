@@ -1,0 +1,3172 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WallDrop – For Your Every Background Need</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script>
+// Define googleSDKReady BEFORE the Google SDK script loads so the onload callback always finds it.
+function googleSDKReady() {
+  if (typeof GOOGLE_CLIENT_ID === 'undefined' || GOOGLE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID') return;
+  if (typeof google !== 'undefined' && google.accounts) initGoogleAuth();
+}
+</script>
+<script src="https://accounts.google.com/gsi/client" async defer onload="googleSDKReady()"></script>
+<script src="https://js.puter.com/v2/"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --gold:#FFB800;--gold-light:#FFD060;--gold-dim:rgba(255,184,0,0.1);
+  --dark:#0d0b09;--dark2:#111009;--dark3:#161310;
+  --border-gold:rgba(255,184,0,0.2);--border-subtle:rgba(255,255,255,0.08);
+  --text-dim:rgba(255,255,255,0.4);--text-mid:rgba(255,255,255,0.7);
+  --card-bg:rgba(180,90,40,0.3);--nav-bg:rgba(255,220,120,0.1);
+  --red:rgba(255,80,80,0.8);--green:rgba(60,200,100,0.8);
+}
+html{scroll-behavior:smooth;}
+body{font-family:'Outfit',sans-serif;background:var(--dark);color:#fff;overflow-x:hidden;}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:var(--dark);}
+::-webkit-scrollbar-thumb{background:rgba(255,184,0,.2);border-radius:4px;}
+
+/* ── VIEWS ── */
+.view{display:none;min-height:100vh;}
+.view.active{display:block;}
+
+/* ─────────────────────────────────────────────
+   NAV
+───────────────────────────────────────────── */
+nav{
+  position:fixed;top:16px;left:50%;transform:translateX(-50%);
+  width:calc(100% - 48px);max-width:1280px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--nav-bg);backdrop-filter:blur(20px) saturate(1.4);
+  -webkit-backdrop-filter:blur(20px) saturate(1.4);
+  border:1px solid var(--border-gold);border-radius:60px;
+  padding:10px 20px 10px 28px;z-index:200;
+  animation:navDrop .6s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes navDrop{from{opacity:0;transform:translateX(-50%) translateY(-20px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.06em;color:var(--gold);text-shadow:0 0 28px rgba(255,184,0,.4);cursor:pointer;user-select:none;}
+.nav-links{display:flex;gap:2rem;list-style:none;}
+.nav-links a{color:var(--text-mid);text-decoration:none;font-weight:500;font-size:.92rem;transition:color .2s;cursor:pointer;}
+.nav-links a:hover{color:var(--gold);}
+.nav-actions{display:flex;gap:.6rem;align-items:center;}
+.btn{padding:8px 22px;border-radius:30px;font-family:'Outfit',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;transition:transform .15s,box-shadow .15s;border:none;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.4);}
+.btn:active{transform:translateY(0);}
+.btn-outline{background:transparent;border:1.5px solid var(--gold);color:var(--gold);}
+.btn-outline:hover{background:var(--gold-dim);}
+.btn-fill{background:var(--gold);color:#1a1000;}
+.btn-fill:hover{background:var(--gold-light);}
+
+/* Avatar pill for logged-in state */
+.user-pill{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border:1px solid var(--border-subtle);border-radius:30px;padding:6px 16px 6px 8px;cursor:pointer;transition:background .2s;}
+.user-pill:hover{background:rgba(255,255,255,.1);}
+.user-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold);}
+.user-avatar-initials{width:30px;height:30px;border-radius:50%;background:var(--gold);color:#1a1000;font-size:.75rem;font-weight:700;display:flex;align-items:center;justify-content:center;letter-spacing:.04em;}
+.user-name{font-size:.85rem;font-weight:600;color:#fff;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* ─────────────────────────────────────────────
+   HERO
+───────────────────────────────────────────── */
+.hero{position:relative;width:100%;min-height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+.hero-bg{
+  position:absolute;inset:0;
+  background:linear-gradient(to bottom,rgba(0,0,0,.55) 0%,rgba(0,0,0,.1) 45%,rgba(0,0,0,.78) 100%),
+    url('https://images.unsplash.com/photo-1518623489648-a173ef7824f3?w=1600&q=80') center/cover no-repeat;
+  transform:scale(1.04);animation:bgZoom 18s ease-in-out infinite alternate;
+}
+@keyframes bgZoom{from{transform:scale(1.04);}to{transform:scale(1.12);}}
+.hero-bg::after{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");pointer-events:none;opacity:.4;}
+.hero-content{position:relative;z-index:2;text-align:center;padding:160px 24px 60px;animation:heroUp .8s .25s cubic-bezier(.22,1,.36,1) both;}
+@keyframes heroUp{from{opacity:0;transform:translateY(32px);}to{opacity:1;transform:translateY(0);}}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(3.5rem,9vw,7rem);line-height:.95;letter-spacing:.04em;color:var(--gold);text-shadow:0 4px 40px rgba(255,184,0,.35),0 0 80px rgba(255,184,0,.15);margin-bottom:.4rem;}
+.hero-sub{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.4rem,4vw,2.6rem);letter-spacing:.06em;color:var(--gold-light);opacity:.9;}
+
+/* ─────────────────────────────────────────────
+   GALLERY
+───────────────────────────────────────────── */
+.section{position:relative;z-index:3;padding:40px 48px 0;max-width:1280px;margin:0 auto;}
+.section-label{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.22em;color:var(--gold);margin-bottom:1.2rem;display:flex;align-items:center;gap:.7rem;}
+.section-label::after{content:'';flex:1;height:1px;background:linear-gradient(to right,rgba(255,184,0,.4),transparent);}
+.cats{display:flex;gap:.65rem;flex-wrap:wrap;margin-bottom:2rem;}
+.cat-pill{padding:7px 18px;border-radius:30px;font-size:.8rem;font-weight:600;letter-spacing:.04em;cursor:pointer;transition:all .2s;border:1.5px solid rgba(255,255,255,.2);background:rgba(0,0,0,.35);color:rgba(255,255,255,.75);backdrop-filter:blur(6px);}
+.cat-pill:hover{border-color:var(--gold);color:var(--gold);}
+.cat-pill.active{background:var(--gold);border-color:var(--gold);color:#1a1000;}
+.wallpaper-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;position:relative;z-index:3;}
+.after-hero{background:var(--dark);padding:0 48px 80px;max-width:1280px;margin:0 auto;position:relative;z-index:3;}
+.after-hero .wallpaper-grid{padding-top:20px;}
+.wall-card{position:relative;border-radius:18px;overflow:hidden;aspect-ratio:16/10;background:var(--card-bg);cursor:pointer;transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s;animation:cardIn .55s both;}
+@keyframes cardIn{from{opacity:0;transform:translateY(20px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+.wall-card:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 24px 60px rgba(0,0,0,.6),0 0 0 1px rgba(255,184,0,.22);}
+.wall-card img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s cubic-bezier(.22,1,.36,1);}
+.wall-card:hover img{transform:scale(1.06);}
+.card-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.72) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:14px;}
+.wall-card:hover .card-overlay{opacity:1;}
+.card-meta{display:flex;justify-content:space-between;align-items:center;width:100%;}
+.card-tag{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);background:rgba(255,184,0,.14);border:1px solid rgba(255,184,0,.28);padding:3px 10px;border-radius:20px;}
+.card-dl{width:32px;height:32px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s,transform .2s;flex-shrink:0;}
+.card-dl:hover{background:var(--gold-light);transform:scale(1.12);}
+.card-dl svg{width:14px;height:14px;fill:#1a1000;}
+.card-fav{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s,transform .2s;flex-shrink:0;border:none;}
+.card-fav:hover,.card-fav.active{background:rgba(255,80,80,.3);transform:scale(1.12);}
+.card-fav svg{width:14px;height:14px;fill:rgba(255,255,255,.6);transition:fill .2s;}
+.card-fav.active svg{fill:#ff6b6b;}
+
+/* ─────────────────────────────────────────────
+   AUTH PAGES (Sign In / Sign Up)
+───────────────────────────────────────────── */
+.auth-page{
+  min-height:100vh;display:flex;position:relative;overflow:hidden;
+}
+/* Left panel — branding */
+.auth-left{
+  width:45%;flex-shrink:0;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;justify-content:space-between;padding:48px;
+}
+.auth-left-bg{
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(0,0,0,.7) 0%,rgba(0,0,0,.2) 50%,rgba(0,0,0,.65) 100%),
+    url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=85') center/cover no-repeat;
+  animation:bgZoom 20s ease-in-out infinite alternate;
+}
+.auth-left-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(to right,rgba(13,11,9,.5),transparent);}
+.auth-left-content{position:relative;z-index:2;}
+.auth-brand{font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:.06em;color:var(--gold);text-shadow:0 0 40px rgba(255,184,0,.5);}
+.auth-brand-sub{font-size:.95rem;color:rgba(255,255,255,.6);margin-top:.3rem;letter-spacing:.02em;}
+.auth-left-quote{position:relative;z-index:2;}
+.auth-quote-text{font-family:'Bebas Neue',sans-serif;font-size:clamp(2rem,4vw,3rem);line-height:1.05;letter-spacing:.03em;color:#fff;text-shadow:0 2px 20px rgba(0,0,0,.5);}
+.auth-quote-sub{font-size:.85rem;color:rgba(255,255,255,.5);margin-top:.8rem;letter-spacing:.03em;}
+/* Floating wallpaper previews */
+.auth-previews{position:absolute;right:-20px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:2;}
+.auth-preview-card{width:90px;height:58px;border-radius:10px;overflow:hidden;opacity:.7;transition:opacity .3s;box-shadow:0 4px 20px rgba(0,0,0,.5);}
+.auth-preview-card:hover{opacity:1;}
+.auth-preview-card img{width:100%;height:100%;object-fit:cover;}
+
+/* Right panel — form */
+.auth-right{
+  flex:1;background:var(--dark2);display:flex;align-items:center;justify-content:center;
+  padding:48px 40px;position:relative;overflow-y:auto;
+}
+.auth-right::before{content:'';position:absolute;top:0;left:0;width:1px;height:100%;background:linear-gradient(to bottom,transparent,rgba(255,184,0,.2),transparent);}
+.auth-form-wrap{width:100%;max-width:400px;}
+.auth-form-title{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:.05em;color:#fff;margin-bottom:.3rem;}
+.auth-form-sub{font-size:.88rem;color:var(--text-dim);margin-bottom:2rem;line-height:1.5;}
+.auth-form-sub a,.auth-form-sub span{color:var(--gold);cursor:pointer;text-decoration:none;}
+.auth-form-sub a:hover,.auth-form-sub span:hover{color:var(--gold-light);}
+
+/* Google button */
+.btn-google{
+  width:100%;display:flex;align-items:center;justify-content:center;gap:12px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);
+  border-radius:12px;padding:13px 20px;font-family:'Outfit',sans-serif;
+  font-size:.95rem;font-weight:500;color:#fff;cursor:pointer;
+  transition:background .2s,border-color .2s,transform .15s;margin-bottom:1.5rem;
+}
+.btn-google:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.28);transform:translateY(-1px);}
+.btn-google:active{transform:translateY(0);}
+.google-icon{width:20px;height:20px;flex-shrink:0;}
+
+/* Divider */
+.auth-divider{display:flex;align-items:center;gap:14px;margin-bottom:1.5rem;}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.1);}
+.auth-divider span{font-size:.75rem;color:var(--text-dim);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;}
+
+/* Form fields */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-group{margin-bottom:1rem;}
+.form-label{display:block;font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:.45rem;}
+.form-input-wrap{position:relative;}
+.form-input{
+  width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+  border-radius:11px;padding:13px 16px;font-family:'Outfit',sans-serif;
+  font-size:.95rem;color:#fff;outline:none;transition:border-color .2s,background .2s;
+}
+.form-input:focus{border-color:rgba(255,184,0,.5);background:rgba(255,184,0,.03);}
+.form-input::placeholder{color:rgba(255,255,255,.25);}
+.form-input.err{border-color:rgba(255,80,80,.5);}
+.input-icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.3);cursor:pointer;font-size:1rem;user-select:none;}
+.form-error{font-size:.76rem;color:rgba(255,110,110,.9);margin-top:.4rem;display:none;}
+.form-error.show{display:block;}
+.form-hint{font-size:.76rem;color:var(--text-dim);margin-top:.35rem;}
+
+/* Password strength */
+.pw-strength{margin-top:.5rem;display:none;}
+.pw-strength.show{display:block;}
+.pw-bars{display:flex;gap:4px;margin-bottom:.3rem;}
+.pw-bar{height:3px;flex:1;border-radius:2px;background:rgba(255,255,255,.1);transition:background .3s;}
+.pw-bar.weak{background:rgba(255,80,80,.7);}
+.pw-bar.medium{background:rgba(255,180,0,.7);}
+.pw-bar.strong{background:rgba(60,200,100,.7);}
+.pw-label{font-size:.72rem;color:var(--text-dim);}
+
+/* Terms */
+.form-check{display:flex;align-items:flex-start;gap:10px;margin-bottom:1.2rem;}
+.form-check input[type=checkbox]{width:16px;height:16px;margin-top:2px;accent-color:var(--gold);cursor:pointer;flex-shrink:0;}
+.form-check label{font-size:.8rem;color:var(--text-dim);line-height:1.5;cursor:pointer;}
+.form-check a{color:var(--gold);text-decoration:none;}
+
+/* Submit */
+.btn-auth{
+  width:100%;padding:14px;border-radius:12px;font-family:'Outfit',sans-serif;
+  font-size:1rem;font-weight:700;cursor:pointer;border:none;
+  background:var(--gold);color:#1a1000;transition:background .2s,transform .15s,box-shadow .2s;
+  display:flex;align-items:center;justify-content:center;gap:10px;letter-spacing:.02em;
+}
+.btn-auth:hover{background:var(--gold-light);transform:translateY(-2px);box-shadow:0 8px 28px rgba(255,184,0,.25);}
+.btn-auth:active{transform:translateY(0);}
+.btn-auth:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
+
+/* Forgot password */
+.forgot-link{text-align:right;margin-top:-.4rem;margin-bottom:1.2rem;}
+.forgot-link a{font-size:.8rem;color:var(--text-dim);text-decoration:none;transition:color .2s;}
+.forgot-link a:hover{color:var(--gold);}
+
+/* Google config notice */
+.google-config-notice{
+  background:rgba(255,184,0,.07);border:1px solid rgba(255,184,0,.2);
+  border-radius:10px;padding:12px 14px;margin-bottom:1.2rem;
+  font-size:.78rem;color:rgba(255,220,100,.8);line-height:1.5;display:none;
+}
+.google-config-notice.show{display:block;}
+.google-config-notice strong{color:var(--gold);}
+.google-config-notice code{background:rgba(0,0,0,.4);padding:1px 5px;border-radius:4px;font-size:.75rem;}
+
+/* ─────────────────────────────────────────────
+   ADMIN PANEL
+───────────────────────────────────────────── */
+.admin-panel{position:fixed;inset:0;background:var(--dark2);z-index:400;overflow-y:auto;display:none;animation:fadeIn .25s ease;}
+.admin-panel.open{display:block;}
+.admin-header{background:rgba(255,184,0,.06);border-bottom:1px solid var(--border-gold);padding:18px 48px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;backdrop-filter:blur(12px);}
+.admin-logo{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--gold);}
+.admin-badge{background:rgba(255,184,0,.15);border:1px solid rgba(255,184,0,.3);color:var(--gold);font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-left:10px;vertical-align:middle;}
+.admin-body{max-width:1280px;margin:0 auto;padding:36px 48px 80px;}
+.admin-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:36px;}
+.stat-card{background:rgba(255,184,0,.04);border:1px solid var(--border-gold);border-radius:14px;padding:18px 22px;}
+.stat-value{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;color:var(--gold);line-height:1;}
+.stat-label{font-size:.74rem;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;margin-top:4px;}
+.admin-section-title{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.15em;color:var(--gold);margin-bottom:1rem;display:flex;align-items:center;gap:.6rem;}
+.admin-section-title::after{content:'';flex:1;height:1px;background:linear-gradient(to right,rgba(255,184,0,.3),transparent);}
+.upload-card{background:rgba(255,184,0,.03);border:1px solid var(--border-gold);border-radius:18px;padding:28px;margin-bottom:36px;}
+.upload-tabs{display:flex;gap:4px;background:rgba(0,0,0,.3);border-radius:10px;padding:4px;margin-bottom:22px;width:fit-content;}
+.upload-tab{padding:7px 18px;border-radius:8px;font-size:.83rem;font-weight:600;cursor:pointer;transition:background .2s,color .2s;color:var(--text-dim);border:none;background:none;font-family:'Outfit',sans-serif;}
+.upload-tab.active{background:var(--gold);color:#1a1000;}
+.upload-form{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.upload-form .span2{grid-column:span 2;}
+.drop-zone{border:2px dashed rgba(255,184,0,.25);border-radius:12px;padding:36px 20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative;}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--gold);background:rgba(255,184,0,.04);}
+.drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.drop-zone-text{font-size:.88rem;color:var(--text-dim);}
+.drop-zone-text strong{color:var(--gold);}
+.drop-preview{max-width:100%;max-height:110px;border-radius:8px;margin-top:10px;object-fit:contain;}
+.form-select{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:13px 16px;font-family:'Outfit',sans-serif;font-size:.92rem;color:#fff;outline:none;transition:border-color .2s;appearance:none;cursor:pointer;}
+.form-select:focus{border-color:rgba(255,184,0,.5);}
+.form-select option{background:#1a1206;}
+.btn-upload{background:var(--gold);color:#1a1000;border:none;border-radius:11px;padding:13px 24px;font-family:'Outfit',sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;transition:background .2s,transform .15s;display:flex;align-items:center;gap:8px;}
+.btn-upload:hover{background:var(--gold-light);transform:translateY(-1px);}
+.btn-upload:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.manage-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;}
+.manage-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:13px;overflow:hidden;transition:border-color .2s;}
+.manage-card:hover{border-color:rgba(255,184,0,.3);}
+.manage-card-img{aspect-ratio:16/10;overflow:hidden;}
+.manage-card-img img{width:100%;height:100%;object-fit:cover;display:block;}
+.manage-card-body{padding:10px 12px;}
+.manage-card-tag{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);background:rgba(255,184,0,.1);border:1px solid rgba(255,184,0,.2);padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:7px;}
+.manage-card-title{font-size:.78rem;color:var(--text-mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:9px;}
+.btn-delete{width:100%;background:rgba(220,50,50,.1);border:1px solid rgba(220,50,50,.22);color:rgba(255,100,100,.75);border-radius:8px;padding:6px;font-size:.75rem;font-weight:600;cursor:pointer;transition:background .2s;font-family:'Outfit',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;}
+.btn-delete:hover{background:rgba(220,50,50,.22);color:#ff8080;}
+
+/* ─────────────────────────────────────────────
+   TOAST & LIGHTBOX
+───────────────────────────────────────────── */
+.toast{position:fixed;bottom:28px;right:28px;background:#181208;border:1px solid var(--border-gold);border-radius:12px;padding:13px 18px;font-size:.86rem;color:#fff;z-index:900;animation:toastIn .3s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;gap:10px;max-width:300px;box-shadow:0 8px 32px rgba(0,0,0,.5);}
+.toast.success{border-color:rgba(60,200,100,.4);}
+.toast.error{border-color:rgba(220,50,50,.4);}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:700;display:none;align-items:center;justify-content:center;flex-direction:column;gap:20px;}
+.lightbox.open{display:flex;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.lightbox img{max-width:90vw;max-height:78vh;border-radius:12px;object-fit:contain;box-shadow:0 20px 80px rgba(0,0,0,.8);}
+.lightbox-actions{display:flex;gap:12px;}
+.lightbox-close{position:fixed;top:18px;right:22px;background:rgba(255,255,255,.08);border:none;color:#fff;font-size:1.5rem;cursor:pointer;width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .2s;}
+.lightbox-close:hover{background:rgba(255,255,255,.18);}
+
+/* ─────────────────────────────────────────────
+   FOOTER
+───────────────────────────────────────────── */
+footer{border-top:1px solid rgba(255,184,0,.1);padding:26px 48px;display:flex;justify-content:space-between;align-items:center;font-size:.82rem;color:rgba(255,255,255,.3);}
+footer .logo{font-size:1.4rem;}
+.footer-admin-link{color:rgba(255,255,255,.18);text-decoration:none;font-size:.74rem;transition:color .2s;cursor:pointer;}
+.footer-admin-link:hover{color:rgba(255,184,0,.5);}
+
+/* ─────────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────────── */
+@media(max-width:900px){
+  .wallpaper-grid{grid-template-columns:repeat(2,1fr);}
+  .upload-form{grid-template-columns:1fr;}
+  .upload-form .span2{grid-column:span 1;}
+  .auth-left{display:none;}
+  .auth-right{padding:60px 28px;}
+  .admin-stats{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:680px){
+  nav{width:calc(100% - 24px);padding:8px 14px;}
+  .nav-links{display:none;}
+  .section{padding:28px 16px 0;}
+  .after-hero{padding:0 16px 60px;}
+  .wallpaper-grid{grid-template-columns:repeat(1,1fr);}
+  footer{flex-direction:column;gap:10px;text-align:center;}
+  .admin-header{padding:14px 18px;}
+  .admin-body{padding:24px 18px 60px;}
+  .admin-stats{grid-template-columns:repeat(2,1fr);}
+  .form-row{grid-template-columns:1fr;}
+}
+
+
+/* ── ANALYTICS SECTION ── */
+.analytics-card{background:rgba(255,184,0,.03);border:1px solid var(--border-gold);border-radius:18px;padding:28px;margin-bottom:24px;}
+.analytics-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:22px;}
+.analytics-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.12em;color:var(--gold);}
+.time-filter-bar{display:flex;gap:4px;background:rgba(0,0,0,.35);border-radius:10px;padding:4px;flex-wrap:wrap;}
+.tf-btn{padding:5px 12px;border-radius:7px;font-size:.75rem;font-weight:600;cursor:pointer;transition:background .2s,color .2s;color:var(--text-dim);border:none;background:none;font-family:'Outfit',sans-serif;white-space:nowrap;}
+.tf-btn.active{background:var(--gold);color:#1a1000;}
+.tf-btn:hover:not(.active){color:#fff;background:rgba(255,255,255,.07);}
+
+/* Category bar chart */
+.cat-bars{display:flex;flex-direction:column;gap:12px;}
+.cat-bar-row{display:grid;grid-template-columns:90px 1fr 56px;align-items:center;gap:12px;}
+.cat-bar-label{font-size:.78rem;font-weight:600;color:var(--text-mid);text-transform:capitalize;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cat-bar-track{height:10px;background:rgba(255,255,255,.06);border-radius:6px;overflow:hidden;}
+.cat-bar-fill{height:100%;border-radius:6px;transition:width .6s cubic-bezier(.22,1,.36,1);}
+.cat-bar-count{font-size:.78rem;font-weight:700;color:var(--gold);text-align:right;}
+
+/* Insight mini-cards */
+.insight-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-bottom:24px;}
+.insight-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:13px;padding:16px 18px;transition:border-color .2s;}
+.insight-card:hover{border-color:rgba(255,184,0,.25);}
+.insight-icon{font-size:1.4rem;margin-bottom:6px;}
+.insight-value{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--gold);line-height:1;}
+.insight-label{font-size:.72rem;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;margin-top:4px;}
+.insight-delta{font-size:.72rem;margin-top:5px;font-weight:600;}
+.insight-delta.up{color:rgba(60,200,100,.9);}
+.insight-delta.down{color:rgba(255,100,100,.9);}
+.insight-delta.neutral{color:var(--text-dim);}
+
+/* Hourly sparkline */
+.sparkline-wrap{display:flex;align-items:flex-end;gap:3px;height:42px;margin-top:10px;}
+.spark-bar{flex:1;border-radius:3px 3px 0 0;background:rgba(255,184,0,.35);transition:height .4s cubic-bezier(.22,1,.36,1),background .2s;min-height:3px;cursor:pointer;}
+.spark-bar:hover{background:var(--gold);}
+
+/* Top wallpapers table */
+.top-walls-table{width:100%;border-collapse:collapse;}
+.top-walls-table th{text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);padding:8px 12px;border-bottom:1px solid var(--border-subtle);}
+.top-walls-table td{padding:10px 12px;font-size:.83rem;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle;}
+.top-walls-table tr:hover td{background:rgba(255,255,255,.025);}
+.top-wall-thumb{width:44px;height:28px;border-radius:6px;object-fit:cover;display:block;}
+.rank-badge{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;}
+.rank-1{background:rgba(255,184,0,.3);color:var(--gold);}
+.rank-2{background:rgba(192,192,192,.2);color:#c0c0c0;}
+.rank-3{background:rgba(205,127,50,.2);color:#cd7f32;}
+.rank-other{background:rgba(255,255,255,.06);color:var(--text-dim);}
+
+/* Activity feed */
+.activity-feed{display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto;}
+.activity-item{display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(255,255,255,.025);border-radius:10px;font-size:.8rem;}
+.activity-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.activity-dot.dl{background:var(--gold);}
+.activity-dot.signup{background:rgba(60,200,100,.8);}
+.activity-dot.upload{background:rgba(100,160,255,.8);}
+.activity-time{color:var(--text-dim);font-size:.72rem;margin-left:auto;white-space:nowrap;}
+
+/* no-data state */
+.no-data{text-align:center;padding:32px;color:var(--text-dim);font-size:.88rem;}
+.no-data-icon{font-size:2rem;margin-bottom:8px;}
+
+/* ── ADMIN USERS TABLE ── */
+.admin-users-table{width:100%;border-collapse:collapse;margin-top:.5rem;}
+.admin-users-table th{text-align:left;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);padding:10px 14px;border-bottom:1px solid var(--border-subtle);}
+.admin-users-table td{padding:12px 14px;font-size:.85rem;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
+.admin-users-table tr:hover td{background:rgba(255,255,255,.03);}
+.user-table-avatar{width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid var(--border-gold);margin-right:10px;vertical-align:middle;}
+.user-table-avatar-initials{width:32px;height:32px;border-radius:50%;background:var(--gold);color:#1a1000;font-size:.72rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-right:10px;vertical-align:middle;flex-shrink:0;}
+.user-table-name{display:inline-flex;align-items:center;}
+.user-provider-badge{font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:20px;display:inline-block;}
+.user-provider-badge.google{background:rgba(66,133,244,.15);color:#6ba3f5;border:1px solid rgba(66,133,244,.25);}
+.user-provider-badge.email{background:rgba(255,184,0,.1);color:var(--gold);border:1px solid var(--border-gold);}
+.btn-delete-user{background:rgba(255,80,80,.1);border:1px solid rgba(255,80,80,.25);color:#ff6060;font-size:.72rem;font-weight:600;padding:4px 12px;border-radius:20px;cursor:pointer;transition:background .2s;}
+.btn-delete-user:hover{background:rgba(255,80,80,.25);}
+.users-empty{text-align:center;padding:40px;color:var(--text-dim);font-size:.9rem;}
+.admin-section-search{display:flex;gap:.8rem;align-items:center;margin-bottom:1rem;}
+.admin-search-input{background:rgba(255,255,255,.05);border:1px solid var(--border-subtle);border-radius:10px;padding:9px 14px;color:#fff;font-family:'Outfit',sans-serif;font-size:.86rem;flex:1;outline:none;transition:border .2s;}
+.admin-search-input:focus{border-color:rgba(255,184,0,.4);}
+.admin-search-input::placeholder{color:var(--text-dim);}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+  NAV (shared)
+══════════════════════════════════════════ -->
+<nav id="main-nav">
+  <div class="logo" onclick="goHome()">WALLDROP</div>
+  <ul class="nav-links">
+    <li><a href="#" onclick="goHome();return false;">Home</a></li>
+    <li><a href="#" onclick="goHome();return false;">Wallpapers</a></li>
+    <li><a href="#" onclick="showToast('Live Wallpapers coming soon!','success');return false;">Live Wallpaper</a></li>
+  </ul>
+  <div class="nav-actions" id="nav-actions">
+    <button class="btn btn-outline" onclick="showSignIn()">Sign In</button>
+    <button class="btn btn-fill" onclick="showSignUp()">Sign Up</button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════
+  VIEW: GALLERY
+══════════════════════════════════════════ -->
+<div class="view active" id="view-gallery">
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <h1 class="hero-title">WallDrop</h1>
+      <p class="hero-sub">For Your Every Background Need</p>
+    </div>
+    <div class="section">
+      <div class="section-label">Wallpapers</div>
+      <div class="cats" id="cats">
+        <button class="cat-pill active" data-cat="all">All</button>
+        <button class="cat-pill" data-cat="nature">Nature</button>
+        <button class="cat-pill" data-cat="abstract">Abstract</button>
+        <button class="cat-pill" data-cat="minimal">Minimal</button>
+        <button class="cat-pill" data-cat="space">Space</button>
+        <button class="cat-pill" data-cat="city">City</button>
+        <button class="cat-pill" data-cat="other">Other</button>
+      </div>
+      <div class="wallpaper-grid" id="grid-row1"></div>
+    </div>
+  </section>
+  <div style="background:var(--dark);position:relative;z-index:3;">
+    <div class="after-hero">
+      <div class="wallpaper-grid" id="grid-row2"></div>
+    </div>
+  </div>
+  <footer>
+    <div class="logo">WALLDROP</div>
+    <span>© 2026 WallDrop. All rights reserved.</span>
+  </footer>
+</div>
+
+<!-- ══════════════════════════════════════════
+  VIEW: SIGN IN
+══════════════════════════════════════════ -->
+<div class="view" id="view-signin">
+  <div class="auth-page">
+    <!-- Left branding panel -->
+    <div class="auth-left">
+      <div class="auth-left-bg"></div>
+      <div class="auth-left-content">
+        <div class="auth-brand">WALLDROP</div>
+        <div class="auth-brand-sub">For Your Every Background Need</div>
+      </div>
+      <div class="auth-left-quote">
+        <div class="auth-quote-text">Beautiful Walls.<br>Every Day.</div>
+        <div class="auth-quote-sub">Thousands of curated wallpapers, one account.</div>
+      </div>
+      <div class="auth-previews">
+        <div class="auth-preview-card"><img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=200&q=80" alt=""></div>
+        <div class="auth-preview-card"><img src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80" alt=""></div>
+        <div class="auth-preview-card"><img src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=200&q=80" alt=""></div>
+      </div>
+    </div>
+    <!-- Right form panel -->
+    <div class="auth-right">
+      <div class="auth-form-wrap">
+        <div class="auth-form-title">Welcome Back</div>
+        <div class="auth-form-sub">Don't have an account? <span onclick="showSignUp()">Sign up free →</span></div>
+
+        <!-- Google notice -->
+        <div class="google-config-notice" id="signin-google-notice">
+          <strong>Google Auth Setup Required</strong><br>
+          Replace <code>YOUR_GOOGLE_CLIENT_ID</code> in the script with your Google Cloud OAuth Client ID to enable Google Sign-In.
+        </div>
+
+        <!-- Google Button (rendered by SDK) -->
+        <div style="display:flex;justify-content:center;margin-bottom:1.5rem;min-height:44px;">
+          <div id="g-signin-btn"></div>
+        </div>
+
+        <div class="auth-divider"><span>or sign in with email</span></div>
+
+        <!-- Email/password form -->
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input class="form-input" type="email" id="si-email" placeholder="you@example.com" autocomplete="email">
+          <div class="form-error" id="si-email-err">Please enter a valid email.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="form-input-wrap">
+            <input class="form-input" type="password" id="si-password" placeholder="••••••••" autocomplete="current-password">
+            <span class="input-icon" onclick="togglePw('si-password',this)">👁</span>
+          </div>
+          <div class="form-error" id="si-pass-err">Incorrect email or password.</div>
+        </div>
+        <div class="forgot-link"><a href="#" onclick="showForgot(event)">Forgot password?</a></div>
+        <button class="btn-auth" id="signin-btn" onclick="doSignIn()">
+          Sign In
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <div style="margin-top:1.5rem;text-align:center;">
+          <span style="font-size:.8rem;color:var(--text-dim);">Back to <span style="color:var(--gold);cursor:pointer;" onclick="goHome()">WallDrop Gallery →</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+  VIEW: SIGN UP
+══════════════════════════════════════════ -->
+<div class="view" id="view-signup">
+  <div class="auth-page">
+    <div class="auth-left">
+      <div class="auth-left-bg" style="background-image:linear-gradient(135deg,rgba(0,0,0,.65) 0%,rgba(0,0,0,.2) 50%,rgba(0,0,0,.6) 100%),url('https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1200&q=85');"></div>
+      <div class="auth-left-content">
+        <div class="auth-brand">WALLDROP</div>
+        <div class="auth-brand-sub">For Your Every Background Need</div>
+      </div>
+      <div class="auth-left-quote">
+        <div class="auth-quote-text">Join the<br>Community.</div>
+        <div class="auth-quote-sub">Save favourites, get personalised picks, access exclusive drops.</div>
+      </div>
+      <div class="auth-previews">
+        <div class="auth-preview-card"><img src="https://images.unsplash.com/photo-1511300636408-a63a89df3482?w=200&q=80" alt=""></div>
+        <div class="auth-preview-card"><img src="https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=200&q=80" alt=""></div>
+        <div class="auth-preview-card"><img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=200&q=80" alt=""></div>
+      </div>
+    </div>
+    <div class="auth-right">
+      <div class="auth-form-wrap">
+        <div class="auth-form-title">Create Account</div>
+        <div class="auth-form-sub">Already have one? <span onclick="showSignIn()">Sign in →</span></div>
+
+        <div class="google-config-notice" id="signup-google-notice">
+          <strong>Google Auth Setup Required</strong><br>
+          Replace <code>YOUR_GOOGLE_CLIENT_ID</code> with your Google Cloud OAuth Client ID to enable Google Sign-Up.
+        </div>
+
+        <!-- Google Button (rendered by SDK) -->
+        <div style="display:flex;justify-content:center;margin-bottom:1.5rem;min-height:44px;">
+          <div id="g-signup-btn"></div>
+        </div>
+
+        <div class="auth-divider"><span>or sign up with email</span></div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input class="form-input" type="text" id="su-fname" placeholder="Aryan" autocomplete="given-name">
+            <div class="form-error" id="su-fname-err">Required.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input class="form-input" type="text" id="su-lname" placeholder="Sharma">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input class="form-input" type="email" id="su-email" placeholder="you@example.com" autocomplete="email">
+          <div class="form-error" id="su-email-err">Please enter a valid email.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="form-input-wrap">
+            <input class="form-input" type="password" id="su-password" placeholder="Min. 8 characters" oninput="checkStrength(this.value)" autocomplete="new-password">
+            <span class="input-icon" onclick="togglePw('su-password',this)">👁</span>
+          </div>
+          <div class="pw-strength" id="pw-strength">
+            <div class="pw-bars">
+              <div class="pw-bar" id="bar1"></div>
+              <div class="pw-bar" id="bar2"></div>
+              <div class="pw-bar" id="bar3"></div>
+              <div class="pw-bar" id="bar4"></div>
+            </div>
+            <div class="pw-label" id="pw-label">Enter a password</div>
+          </div>
+          <div class="form-error" id="su-pass-err">Password must be at least 8 characters.</div>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" id="su-terms">
+          <label for="su-terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+        </div>
+        <div class="form-error" id="su-terms-err" style="margin-top:-.6rem;margin-bottom:.8rem;">Please accept terms to continue.</div>
+        <button class="btn-auth" id="signup-btn" onclick="doSignUp()">
+          Create Account
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        </button>
+        <div style="margin-top:1.4rem;text-align:center;">
+          <span style="font-size:.8rem;color:var(--text-dim);">Back to <span style="color:var(--gold);cursor:pointer;" onclick="goHome()">WallDrop Gallery →</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Panel -->
+<div class="admin-panel" id="admin-panel">
+  <div class="admin-header">
+    <div>
+      <span class="admin-logo">WALLDROP</span>
+      <span class="admin-badge">Admin</span>
+    </div>
+    <div style="display:flex;gap:.8rem;align-items:center;">
+      <span id="r2-status-badge" style="display:none;background:rgba(249,130,17,0.15);border:1px solid rgba(249,130,17,0.4);color:rgb(249,180,80);font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:20px;">☁ R2 Active</span>
+      <span id="github-status-badge" style="display:none;background:rgba(60,200,100,0.12);border:1px solid rgba(60,200,100,0.35);color:rgba(80,220,120,1);font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:20px;">🐙 GitHub Active</span>
+      <button class="btn btn-outline" onclick="closeAdminPanel()">← View Site</button>
+      <button class="btn btn-fill" onclick="adminLogout()">Logout</button>
+    </div>
+  </div>
+  <div class="admin-body">
+    <div class="admin-stats" id="admin-stats"></div>
+    <div class="admin-section-title">Upload Wallpaper</div>
+    <div class="upload-card">
+      <div class="upload-tabs">
+        <button class="upload-tab active" data-tab="url">URL</button>
+        <button class="upload-tab" data-tab="file">File Upload</button>
+      </div>
+      <div id="tab-url">
+        <div class="upload-form">
+          <div>
+            <label class="form-label">Image URL</label>
+            <input class="form-input" type="url" id="up-url" placeholder="https://images.unsplash.com/...">
+          </div>
+          <div>
+            <label class="form-label">Display Title</label>
+            <input class="form-input" type="text" id="up-title" placeholder="Mountain Sunrise">
+          </div>
+          <div>
+            <label class="form-label">Category</label>
+            <select class="form-select" id="up-cat">
+              <option value="nature">Nature</option><option value="abstract">Abstract</option>
+              <option value="minimal">Minimal</option><option value="space">Space</option>
+              <option value="city">City</option><option value="other">Other</option>
+            </select>
+          </div>
+          <div style="display:flex;align-items:flex-end;">
+            <button class="btn-upload" id="btn-url-upload" onclick="doUrlUpload()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg> Add Wallpaper
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="tab-file" style="display:none">
+        <div class="upload-form">
+          <div class="span2">
+            <label class="form-label">Image File</label>
+            <div class="drop-zone" id="drop-zone">
+              <input type="file" id="file-input" accept="image/*">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(255,184,0,0.4)" stroke-width="1.5" style="margin:0 auto 10px;display:block;"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9l4-4 4 4 5-5 5 5"/><circle cx="8.5" cy="13.5" r="1.5"/></svg>
+              <div class="drop-zone-text">Drag & drop or <strong>click to browse</strong></div>
+              <div style="font-size:.72rem;color:var(--text-dim);margin-top:5px;">PNG, JPG, WebP — max 4MB</div>
+              <img class="drop-preview" id="drop-preview" style="display:none">
+            </div>
+          </div>
+          <div>
+            <label class="form-label">Title <span style="color:rgba(100,200,255,.7);font-size:.68rem;">✦ Auto-filled</span></label>
+            <input class="form-input" type="text" id="up-title-file" placeholder="Auto-detected on upload…">
+          </div>
+          <div>
+            <label class="form-label">Category <span style="color:rgba(100,200,255,.7);font-size:.68rem;">✦ Auto-detected</span></label>
+            <select class="form-select" id="up-cat-file">
+              <option value="nature">Nature</option><option value="abstract">Abstract</option>
+              <option value="minimal">Minimal</option><option value="space">Space</option>
+              <option value="city">City</option><option value="other">Other</option>
+            </select>
+          </div>
+          <div class="span2" style="grid-column:span 2;">
+            <label class="form-label">Description <span style="color:rgba(100,200,255,.7);font-size:.68rem;">✦ Auto-written</span></label>
+            <input class="form-input" type="text" id="up-desc-file" placeholder="Description will be auto-generated when you pick an image…" style="width:100%;">
+          </div>
+          <div style="display:flex;align-items:flex-end;">
+            <button class="btn-upload" id="btn-file-upload" onclick="doFileUpload()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg> Upload File
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── AI PROVIDER SETUP ── -->
+    <div class="upload-card" style="margin-bottom:36px;border-color:rgba(120,160,255,0.35);background:rgba(80,120,255,0.04);">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <span style="font-size:1.5rem;">🤖</span>
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:.12em;color:rgba(150,180,255,1);">AI Vision — Auto Category, Title &amp; Description</div>
+          <div style="font-size:.78rem;color:var(--text-dim);margin-top:2px;">Choose your free AI provider below. Both work in India &amp; all regions.</div>
+        </div>
+        <div id="gemini-status-badge" style="margin-left:auto;font-size:.78rem;font-weight:700;padding:4px 14px;border-radius:20px;background:rgba(255,100,100,.1);border:1px solid rgba(255,100,100,.25);color:rgba(255,130,130,1);">⚠ Not Set</div>
+      </div>
+
+      <!-- Provider selector -->
+      <div style="display:flex;gap:6px;margin-bottom:16px;">
+        <button id="provider-btn-gemini" onclick="switchProvider('gemini')" style="flex:1;padding:9px 14px;border-radius:10px;font-family:'Outfit',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;border:1.5px solid rgba(66,200,120,.5);background:rgba(66,200,120,.12);color:rgba(100,230,150,1);transition:all .2s;">
+          ✦ Google Gemini <span style="font-weight:400;opacity:.7;">(1500/day free)</span>
+        </button>
+        <button id="provider-btn-openrouter" onclick="switchProvider('openrouter')" style="flex:1;padding:9px 14px;border-radius:10px;font-family:'Outfit',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;border:1.5px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:rgba(255,255,255,.45);transition:all .2s;">
+          OpenRouter <span style="font-weight:400;opacity:.7;">(200/day free)</span>
+        </button>
+        <button id="provider-btn-puter" onclick="switchProvider('puter')" style="flex:1;padding:9px 14px;border-radius:10px;font-family:'Outfit',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;border:1.5px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:rgba(255,255,255,.45);transition:all .2s;">
+          ✦ Puter.ai <span style="font-weight:400;opacity:.7;">(no key needed)</span>
+        </button>
+      </div>
+
+      <!-- Gemini fields -->
+      <div id="ai-fields-gemini">
+        <div style="display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:flex-end;margin-bottom:10px;">
+          <div>
+            <label class="form-label">Google Gemini API Key <span style="color:rgba(100,230,150,.7);font-weight:400;text-transform:none;letter-spacing:0;">— free at <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:rgba(100,230,150,1);">aistudio.google.com</a> → Get API Key</span></label>
+            <input class="form-input" type="password" id="gemini-key-input" placeholder="AIza…" style="border-color:rgba(66,200,120,0.3);" oninput="updateGeminiStatus()">
+          </div>
+          <button class="btn-upload" onclick="saveGeminiKeyUI()" style="background:rgba(66,200,120,0.85);color:#05180f;white-space:nowrap;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg> Save
+          </button>
+          <button class="btn-upload" onclick="testAIKey()" style="background:rgba(255,184,0,0.15);color:var(--gold);border:1px solid rgba(255,184,0,.35);white-space:nowrap;">
+            🔍 Test
+          </button>
+        </div>
+        <div style="font-size:.73rem;color:var(--text-dim);line-height:1.7;">
+          🆓 <strong style="color:rgba(100,230,150,.8);">1,500 requests/day · 15 req/min · completely free</strong> — no credit card ever. &nbsp;|&nbsp;
+          🌍 Works in India &amp; all regions. &nbsp;|&nbsp;
+          🔒 Key saved only in your browser. &nbsp;|&nbsp;
+          🔎 Model: <strong style="color:rgba(100,230,150,.8);">gemini-2.0-flash</strong> (vision-capable).
+        </div>
+      </div>
+
+      <!-- OpenRouter fields -->
+      <div id="ai-fields-openrouter" style="display:none;">
+        <div style="display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:flex-end;margin-bottom:10px;">
+          <div>
+            <label class="form-label">OpenRouter API Key <span style="color:rgba(150,180,255,.7);font-weight:400;text-transform:none;letter-spacing:0;">— free at <a href="https://openrouter.ai" target="_blank" style="color:rgba(150,180,255,1);">openrouter.ai</a> → Keys</span></label>
+            <input class="form-input" type="password" id="or-key-input" placeholder="sk-or-v1-…" style="border-color:rgba(120,160,255,0.3);" oninput="updateGeminiStatus()">
+          </div>
+          <button class="btn-upload" onclick="saveGeminiKeyUI()" style="background:rgba(120,160,255,0.85);color:#05080f;white-space:nowrap;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg> Save
+          </button>
+          <button class="btn-upload" onclick="testAIKey()" style="background:rgba(255,184,0,0.15);color:var(--gold);border:1px solid rgba(255,184,0,.35);white-space:nowrap;">
+            🔍 Test
+          </button>
+        </div>
+        <div style="font-size:.73rem;color:var(--text-dim);line-height:1.7;">
+          🌍 Works in India &amp; all regions. &nbsp;|&nbsp;
+          🔒 Key saved only in your browser. &nbsp;|&nbsp;
+          🔄 Auto-fallback: Llama 4 → Gemma 27B → Qwen 72B → Mistral. &nbsp;|&nbsp;
+          📊 Free: <strong style="color:rgba(150,180,255,.8);">200 req/day, 20/min</strong>.
+        </div>
+      </div>
+
+      <!-- Puter fields -->
+      <div id="ai-fields-puter" style="display:none;">
+        <div style="background:rgba(255,184,0,.06);border:1px solid rgba(255,184,0,.2);border-radius:10px;padding:14px 16px;margin-bottom:10px;">
+          <div style="font-size:.85rem;font-weight:700;color:var(--gold);margin-bottom:6px;">✦ No API Key Required!</div>
+          <div style="font-size:.76rem;color:var(--text-dim);line-height:1.7;">
+            Puter.ai provides free AI vision via the browser — sign in with Puter when prompted.<br>
+            🌍 Works everywhere &nbsp;|&nbsp; 🔒 No key to store &nbsp;|&nbsp; 🤖 Multiple vision models available.
+          </div>
+        </div>
+        <div style="font-size:.73rem;color:var(--text-dim);line-height:1.7;">
+          🆓 <strong style="color:rgba(255,220,100,.8);">Free via puter.com</strong> — uses claude-sonnet-4-5, gpt-4o, and other vision models as fallback.
+        </div>
+      </div>
+
+      <div id="gemini-key-result" style="margin-top:10px;font-size:.8rem;display:none;padding:8px 12px;border-radius:8px;"></div>
+    </div>
+
+    <!-- ── GITHUB SETUP GUIDE ── -->
+    <div id="github-setup-card" class="upload-card" style="margin-bottom:36px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <span style="font-size:1.5rem;">🐙</span>
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:.12em;color:var(--gold);">GitHub Storage — Free &amp; Unlimited</div>
+          <div style="font-size:.78rem;color:var(--text-dim);margin-top:2px;">Upload wallpapers to GitHub and serve them via jsDelivr CDN globally for free.</div>
+        </div>
+        <div id="gh-setup-status" style="margin-left:auto;font-size:.78rem;font-weight:700;padding:4px 14px;border-radius:20px;background:rgba(255,100,100,.1);border:1px solid rgba(255,100,100,.25);color:rgba(255,130,130,1);">⚠ Not Configured</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;" id="gh-config-fields">
+        <div>
+          <label class="form-label">GitHub Token</label>
+          <input class="form-input" type="password" id="gh-token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" oninput="liveUpdateGHConfig()">
+          <div style="font-size:.7rem;color:var(--text-dim);margin-top:4px;">Settings → Developer settings → Personal access tokens → Fine-grained → Contents: Read &amp; write</div>
+        </div>
+        <div>
+          <label class="form-label">GitHub Username</label>
+          <input class="form-input" type="text" id="gh-user-input" placeholder="yourusername" oninput="liveUpdateGHConfig()">
+        </div>
+        <div>
+          <label class="form-label">Repository Name</label>
+          <input class="form-input" type="text" id="gh-repo-input" placeholder="walldrop-images" oninput="liveUpdateGHConfig()">
+          <div style="font-size:.7rem;color:var(--text-dim);margin-top:4px;">Must be a <strong style="color:var(--gold);">public</strong> GitHub repo</div>
+        </div>
+        <div>
+          <label class="form-label">Branch</label>
+          <input class="form-input" type="text" id="gh-branch-input" placeholder="main" value="main" oninput="liveUpdateGHConfig()">
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button class="btn-upload" onclick="applyGHConfig()" style="background:rgba(60,200,100,0.85);color:#0d1a0f;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+          Save Config Permanently
+        </button>
+        <button class="btn-upload" onclick="testGHConfig()" style="background:rgba(255,184,0,.12);color:var(--gold);border:1px solid rgba(255,184,0,.3);">
+          🔍 Test Connection
+        </button>
+        <button class="btn-upload" onclick="clearGHConfig()" style="background:rgba(255,80,80,.1);color:rgba(255,120,120,1);border:1px solid rgba(255,80,80,.25);">
+          🗑 Remove Credentials
+        </button>
+        <span style="font-size:.75rem;color:var(--text-dim);">Credentials are saved permanently in your browser and will persist across page refreshes and sessions until you remove them.</span>
+      </div>
+      <div id="gh-test-result" style="margin-top:12px;font-size:.8rem;display:none;padding:10px 14px;border-radius:10px;"></div>
+    </div>
+
+        <!-- ── GITHUB DATABASE REPO SETUP ── -->
+    <div id="github-db-card" class="upload-card" style="margin-bottom:36px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <span style="font-size:1.5rem;">🗄️</span>
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:.12em;color:var(--gold);">GitHub Database — Persistent Cloud Backup</div>
+          <div style="font-size:.78rem;color:var(--text-dim);margin-top:2px;">All wallpaper data (URLs, titles, categories) is saved as <strong style="color:rgba(255,184,0,.8)">walldrop-db.json</strong> in a separate GitHub repo. Your data survives server restarts, browser clears, and device changes.</div>
+        </div>
+        <div id="gh-db-status" style="margin-left:auto;font-size:.78rem;font-weight:700;padding:4px 14px;border-radius:20px;background:rgba(255,100,100,.1);border:1px solid rgba(255,100,100,.25);color:rgba(255,130,130,1);white-space:nowrap;">⚠ Not Configured</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div style="grid-column:span 2;background:rgba(255,184,0,.04);border:1px solid rgba(255,184,0,.15);border-radius:10px;padding:10px 14px;font-size:.76rem;color:rgba(255,220,100,.75);line-height:1.6;">
+          💡 <strong style="color:var(--gold)">Can be the same token as above</strong> — just create a separate <em>public</em> repo (e.g. <code style="background:rgba(0,0,0,.4);padding:1px 5px;border-radius:3px;">walldrop-db</code>) to keep images and data separate. Every time you add/delete a wallpaper, the JSON is auto-committed there.
+        </div>
+        <div>
+          <label class="form-label">GitHub Token</label>
+          <input class="form-input" type="password" id="gh-db-token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" oninput="liveUpdateGHDbConfig()">
+          <div style="font-size:.7rem;color:var(--text-dim);margin-top:4px;">Same token as above works — needs Contents: Read &amp; write</div>
+        </div>
+        <div>
+          <label class="form-label">GitHub Username</label>
+          <input class="form-input" type="text" id="gh-db-user-input" placeholder="yourusername" oninput="liveUpdateGHDbConfig()">
+        </div>
+        <div>
+          <label class="form-label">Database Repository Name</label>
+          <input class="form-input" type="text" id="gh-db-repo-input" placeholder="walldrop-db" oninput="liveUpdateGHDbConfig()">
+          <div style="font-size:.7rem;color:var(--text-dim);margin-top:4px;">Must be a <strong style="color:var(--gold);">public</strong> repo — can be different from your images repo</div>
+        </div>
+        <div>
+          <label class="form-label">Branch</label>
+          <input class="form-input" type="text" id="gh-db-branch-input" placeholder="main" value="main" oninput="liveUpdateGHDbConfig()">
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
+        <button class="btn-upload" onclick="applyGHDbConfig()" style="background:rgba(60,200,100,0.85);color:#0d1a0f;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+          Save DB Config
+        </button>
+        <button class="btn-upload" onclick="pushDBToGitHub(true)" style="background:rgba(255,184,0,.12);color:var(--gold);border:1px solid rgba(255,184,0,.3);">
+          ☁ Push DB Now
+        </button>
+        <button class="btn-upload" onclick="pullDBFromGitHub()" style="background:rgba(100,180,255,.1);color:rgba(140,200,255,1);border:1px solid rgba(100,180,255,.25);">
+          ⬇ Restore from GitHub
+        </button>
+        <button class="btn-upload" onclick="clearGHDbConfig()" style="background:rgba(255,80,80,.1);color:rgba(255,120,120,1);border:1px solid rgba(255,80,80,.25);">
+          🗑 Remove
+        </button>
+      </div>
+      <div id="gh-db-result" style="margin-top:4px;font-size:.8rem;display:none;padding:10px 14px;border-radius:10px;"></div>
+      <div style="font-size:.74rem;color:var(--text-dim);margin-top:8px;">📁 Data is saved as <code style="background:rgba(0,0,0,.35);padding:1px 6px;border-radius:3px;">walldrop-db.json</code> in the root of your DB repo — auto-pushed on every upload or delete.</div>
+    </div>
+
+    <!-- ── ANALYTICS ── -->
+    <div class="admin-section-title" style="margin-bottom:1rem;">Analytics & Insights</div>
+
+    <!-- Insight mini-cards -->
+    <div class="insight-grid" id="insight-grid"></div>
+
+    <!-- Category Downloads -->
+    <div class="analytics-card">
+      <div class="analytics-header">
+        <div class="analytics-title">📊 Downloads by Category</div>
+        <div class="time-filter-bar" id="cat-tf">
+          <button class="tf-btn active" data-days="180">6 Months</button>
+          <button class="tf-btn" data-days="90">3 Months</button>
+          <button class="tf-btn" data-days="30">1 Month</button>
+          <button class="tf-btn" data-days="7">1 Week</button>
+          <button class="tf-btn" data-days="3">3 Days</button>
+          <button class="tf-btn" data-days="2">2 Days</button>
+          <button class="tf-btn" data-days="1">Today</button>
+        </div>
+      </div>
+      <div class="cat-bars" id="cat-download-bars"></div>
+    </div>
+
+    <!-- Top Downloaded Wallpapers -->
+    <div class="analytics-card">
+      <div class="analytics-header">
+        <div class="analytics-title">🏆 Top Downloaded Wallpapers</div>
+        <div class="time-filter-bar" id="top-tf">
+          <button class="tf-btn active" data-days="180">6 Months</button>
+          <button class="tf-btn" data-days="90">3 Months</button>
+          <button class="tf-btn" data-days="30">1 Month</button>
+          <button class="tf-btn" data-days="7">1 Week</button>
+          <button class="tf-btn" data-days="3">3 Days</button>
+          <button class="tf-btn" data-days="2">2 Days</button>
+          <button class="tf-btn" data-days="1">Today</button>
+        </div>
+      </div>
+      <div id="top-walls-wrap"></div>
+    </div>
+
+    <!-- Download Sparkline + Activity feed side by side -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+      <div class="analytics-card" style="margin-bottom:0">
+        <div class="analytics-header" style="margin-bottom:10px;">
+          <div class="analytics-title">📈 Daily Downloads (Last 14 Days)</div>
+        </div>
+        <div class="sparkline-wrap" id="dl-sparkline"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:.68rem;color:var(--text-dim);" id="spark-labels"></div>
+      </div>
+      <div class="analytics-card" style="margin-bottom:0">
+        <div class="analytics-header" style="margin-bottom:10px;">
+          <div class="analytics-title">🕐 Recent Activity</div>
+        </div>
+        <div class="activity-feed" id="activity-feed"></div>
+      </div>
+    </div>
+
+    <div class="admin-section-title">Manage Wallpapers</div>
+    <div class="manage-grid" id="manage-grid"></div>
+
+    <div class="admin-section-title" style="margin-top:2.5rem;">Registered Users</div>
+    <div class="admin-section-search">
+      <input class="admin-search-input" id="user-search" type="text" placeholder="🔍  Search by name or email…" oninput="renderUsersTable()">
+    </div>
+    <div class="upload-card" style="padding:0;overflow:hidden;">
+      <div id="users-table-wrap" style="overflow-x:auto;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Login Modal -->
+<div class="modal-backdrop" id="admin-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:500;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#181410;border:1px solid var(--border-gold);border-radius:22px;padding:36px;width:100%;max-width:400px;position:relative;animation:fadeIn .25s ease;">
+    <button style="position:absolute;top:14px;right:18px;background:none;border:none;color:rgba(255,255,255,.4);font-size:1.4rem;cursor:pointer;line-height:1;" onclick="closeAdminModal()">×</button>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold);letter-spacing:.06em;margin-bottom:.2rem;">Admin Login</div>
+    <div style="font-size:.82rem;color:var(--text-dim);margin-bottom:1.8rem;">Restricted access — administrators only.</div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input class="form-input" type="email" id="adm-user" placeholder="admin@walldrop.nf.gd" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input class="form-input" type="password" id="adm-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')tryAdminLogin()">
+    </div>
+    <div class="form-error" id="adm-err" style="margin-bottom:.8rem;">Incorrect credentials.</div>
+    <button class="btn-auth" onclick="tryAdminLogin()">Access Dashboard →</button>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" onclick="closeLightbox()">×</button>
+  <img id="lb-img" src="" alt="">
+  <div class="lightbox-actions">
+    <a id="lb-dl" href="#" class="btn btn-fill" style="text-decoration:none;padding:10px 24px;">↓ Download</a>
+    <button class="btn btn-outline" onclick="closeLightbox()">Close</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+  JAVASCRIPT
+══════════════════════════════════════════ -->
+<script>
+// ──────────────────────────────────────────
+// CONFIG
+// ──────────────────────────────────────────
+const GOOGLE_CLIENT_ID = '89270900965-uedci82mal2qjgvl40csai0he4saphs6.apps.googleusercontent.com';
+// NOTE: Admin credentials are validated server-side via /api/login.
+//       They have been removed from the client to prevent exposure.
+const WALLS_KEY   = 'walldrop-wallpapers';
+const USERS_KEY   = 'walldrop-users';
+const SESSION_KEY = 'walldrop-session';
+
+// ── CLOUDFLARE R2 CONFIG ──────────────────
+// Set these to enable real image storage in Cloudflare R2.
+// Leave R2_WORKER_URL as '' to fall back to base64 in-memory mode.
+//
+// R2_WORKER_URL  → URL of your deployed Cloudflare Worker (see README below)
+// R2_BUCKET_PUBLIC_URL → Public URL of your R2 bucket (e.g. https://pub-xxxx.r2.dev)
+//
+const R2_WORKER_URL      = '';          // e.g. 'https://walldrop-r2.YOUR_NAME.workers.dev'
+const R2_BUCKET_PUBLIC_URL = '';        // e.g. 'https://pub-abcd1234.r2.dev'
+const R2_USE_AUTH_TOKEN  = '';          // Optional bearer token you set in your Worker
+
+// Helper: is R2 configured?
+function r2Enabled() { return R2_WORKER_URL.length > 0; }
+
+// ── GITHUB STORAGE CONFIG ─────────────────
+// Upload wallpapers directly to a GitHub repo via the GitHub API.
+// Served for free via jsDelivr CDN — unlimited storage!
+//
+// GITHUB_TOKEN   → Personal Access Token (Settings → Developer settings → Tokens → Fine-grained)
+//                  Required scopes: Contents (read & write)
+// GITHUB_USER    → Your GitHub username  e.g. 'aryan2311'
+// GITHUB_REPO    → Repo name             e.g. 'walldrop-images'
+// GITHUB_BRANCH  → Branch to commit to   e.g. 'main'
+// GITHUB_FOLDER  → Folder inside repo    e.g. 'wallpapers'
+//
+const GITHUB_TOKEN  = '';   // ← paste your token here
+const GITHUB_USER   = '';   // ← your GitHub username
+const GITHUB_REPO   = '';   // ← repo name  (must be PUBLIC)
+const GITHUB_BRANCH = 'main';
+const GITHUB_FOLDER = 'wallpapers';
+
+function githubEnabled() {
+  return GITHUB_TOKEN.length > 0 && GITHUB_USER.length > 0 && GITHUB_REPO.length > 0;
+}
+
+// Upload a File object to GitHub, returns the jsDelivr CDN URL
+async function uploadToGitHub(file) {
+  if (!githubEnabled()) throw new Error('GitHub not configured');
+
+  const ext  = file.name.split('.').pop().toLowerCase() || 'jpg';
+  const name = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const path = `${GITHUB_FOLDER}/${name}`;
+  const apiUrl = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${path}`;
+
+  // Convert file to base64
+  const base64 = await new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload  = () => res(r.result.split(',')[1]);
+    r.onerror = () => rej(new Error('FileReader failed'));
+    r.readAsDataURL(file);
+  });
+
+  const body = JSON.stringify({
+    message: `Upload wallpaper: ${name}`,
+    branch:  GITHUB_BRANCH,
+    content: base64,
+  });
+
+  const resp = await fetch(apiUrl, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${GITHUB_TOKEN}`,
+      'Content-Type':  'application/json',
+      'Accept':        'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+    },
+    body,
+  });
+
+  if (!resp.ok) {
+    const msg = await resp.text().catch(() => '');
+    throw new Error(`GitHub API error ${resp.status}: ${msg}`);
+  }
+
+  // Return jsDelivr CDN URL for instant global delivery
+  const cdnUrl = `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}@${GITHUB_BRANCH}/${path}`;
+  return cdnUrl;
+}
+
+// Delete a file from GitHub (looks up SHA first)
+async function deleteFromGitHub(cdnUrl) {
+  if (!githubEnabled() || !cdnUrl) return;
+  try {
+    // Extract path from jsDelivr URL
+    const prefix = `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}@${GITHUB_BRANCH}/`;
+    if (!cdnUrl.startsWith(prefix)) return;
+    const filePath = cdnUrl.slice(prefix.length);
+    const apiUrl = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${filePath}`;
+    const headers = {
+      'Authorization': `Bearer ${GITHUB_TOKEN}`,
+      'Accept': 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+    };
+    // Get SHA (required for deletion)
+    const info = await fetch(apiUrl, { headers });
+    if (!info.ok) return;
+    const { sha } = await info.json();
+    await fetch(apiUrl, {
+      method: 'DELETE',
+      headers: { ...headers, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: `Delete wallpaper: ${filePath}`, sha, branch: GITHUB_BRANCH }),
+    });
+  } catch(e) { console.warn('GitHub delete failed', e); }
+}
+
+// ── R2 UPLOAD FUNCTION ────────────────────
+// Sends the file to your Cloudflare Worker which proxies it to R2.
+// Returns the public URL of the uploaded image, or throws on error.
+async function uploadToR2(file) {
+  if (!r2Enabled()) throw new Error('R2 not configured');
+
+  const ext   = file.name.split('.').pop() || 'jpg';
+  const key   = `walldrop/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const endpoint = `${R2_WORKER_URL}/upload/${encodeURIComponent(key)}`;
+
+  const headers = { 'Content-Type': file.type || 'image/jpeg' };
+  if (R2_USE_AUTH_TOKEN) headers['Authorization'] = `Bearer ${R2_USE_AUTH_TOKEN}`;
+
+  const res = await fetch(endpoint, { method: 'PUT', headers, body: file });
+  if (!res.ok) {
+    const msg = await res.text().catch(()=>'');
+    throw new Error(`R2 upload failed: ${res.status} ${msg}`);
+  }
+
+  // Public URL = bucket public domain + key
+  return `${R2_BUCKET_PUBLIC_URL.replace(/\/$/, '')}/${key}`;
+}
+
+// ── R2 DELETE FUNCTION ────────────────────
+async function deleteFromR2(url) {
+  if (!r2Enabled() || !url || !url.startsWith(R2_BUCKET_PUBLIC_URL)) return;
+  try {
+    // Extract key from URL
+    const key = url.replace(R2_BUCKET_PUBLIC_URL.replace(/\/$/, '')+'/', '');
+    const endpoint = `${R2_WORKER_URL}/delete/${encodeURIComponent(key)}`;
+    const headers = {};
+    if (R2_USE_AUTH_TOKEN) headers['Authorization'] = `Bearer ${R2_USE_AUTH_TOKEN}`;
+    await fetch(endpoint, { method: 'DELETE', headers });
+  } catch(e) { console.warn('R2 delete failed', e); }
+}
+
+
+const DL_KEY      = 'walldrop-downloads';   // [{wallId, cat, title, ts}]
+const ACTIVITY_KEY= 'walldrop-activity';    // [{type:'dl'|'signup'|'upload', label, ts}]
+
+// ── LOAD/SAVE DOWNLOAD LOG ──
+async function loadDownloads() {
+  try { const r=localStorage.getItem(DL_KEY); return r ? JSON.parse(r) : []; }
+  catch(e){ return []; }
+}
+async function saveDownloads(log) {
+  try { localStorage.setItem(DL_KEY, JSON.stringify(log)); } catch(e){}
+}
+async function loadActivity() {
+  try { const r=localStorage.getItem(ACTIVITY_KEY); return r ? JSON.parse(r) : []; }
+  catch(e){ return []; }
+}
+async function saveActivity(log) {
+  try { localStorage.setItem(ACTIVITY_KEY, JSON.stringify(log.slice(-200))); } catch(e){}
+}
+async function pushActivity(type, label) {
+  const log = await loadActivity();
+  log.push({type, label, ts: Date.now()});
+  await saveActivity(log);
+}
+
+// ── RECORD A DOWNLOAD ──
+async function recordDownload(wallId, cat, title) {
+  const log = await loadDownloads();
+  log.push({wallId, cat: cat||'other', title: title||wallId, ts: Date.now()});
+  await saveDownloads(log);
+  await pushActivity('dl', title||cat||wallId);
+}
+
+// ── STATE ──
+let wallpapers = [];
+let users = [];
+let currentUser = null;
+let activeCat = 'all';
+let fileBase64 = null;
+
+// ── DEFAULT WALLPAPERS ──
+const DEFAULT_WALLS = [
+  {id:'d1',src:'https://images.unsplash.com/photo-1518623489648-a173ef7824f3?w=1400&q=85',thumb:'https://images.unsplash.com/photo-1518623489648-a173ef7824f3?w=800&q=80',cat:'nature',tag:'Nature',title:'Forest Light',isDefault:true},
+  {id:'d2',src:'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=1400&q=85',thumb:'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=800&q=80',cat:'space',tag:'Space',title:'Galaxy',isDefault:true},
+  {id:'d3',src:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1400&q=85',thumb:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80',cat:'nature',tag:'Nature',title:'Alpine Peaks',isDefault:true},
+  {id:'d4',src:'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1400&q=85',thumb:'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=800&q=80',cat:'abstract',tag:'Abstract',title:'Color Gradient',isDefault:true},
+  {id:'d5',src:'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1400&q=85',thumb:'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80',cat:'city',tag:'City',title:'City Skyline',isDefault:true},
+  {id:'d6',src:'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1400&q=85',thumb:'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=80',cat:'nature',tag:'Nature',title:'Snowy Mountains',isDefault:true},
+  {id:'d7',src:'https://images.unsplash.com/photo-1511300636408-a63a89df3482?w=1400&q=85',thumb:'https://images.unsplash.com/photo-1511300636408-a63a89df3482?w=800&q=80',cat:'minimal',tag:'Minimal',title:'Minimalist',isDefault:true},
+  {id:'d8',src:'https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=1400&q=85',thumb:'https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=800&q=80',cat:'space',tag:'Space',title:'Deep Space',isDefault:true},
+  {id:'d9',src:'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1400&q=85',thumb:'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80',cat:'city',tag:'City',title:'Architecture',isDefault:true},
+];
+
+// ──────────────────────────────────────────
+// STORAGE
+// ──────────────────────────────────────────
+async function loadData() {
+  // Load DB repo config first (needed for auto-pull check below).
+  // MUST be awaited — it's async (fetches walldrop-config.json / localStorage).
+  // Without await, ghDbEnabled() is always false on the first visit and no auto-sync happens.
+  await loadGHDbConfig();
+
+  // ── AUTO-SYNC FROM GITHUB DB ──────────────────────────────────────────────
+  // If GitHub DB is configured, always pull the latest data on page load.
+  // This ensures any origin (localhost, tunnel, deployed URL) stays in sync
+  // automatically without needing a manual "Restore from GitHub" click.
+  if (ghDbEnabled()) {
+    try {
+      const rawUrl = `https://raw.githubusercontent.com/${_ghDbUser}/${_ghDbRepo}/${_ghDbBranch}/${GH_DB_FILE}`;
+      const resp = await fetch(rawUrl + '?cb=' + Date.now());
+      if (resp.ok) {
+        const db = await resp.json();
+        if (db.wallpapers && db.wallpapers.length) {
+          wallpapers = db.wallpapers;
+          if (db.users) users = db.users;
+          // Update local cache so next load is instant (GitHub fetch runs in parallel)
+          try { localStorage.setItem(WALLS_KEY, JSON.stringify(wallpapers)); } catch(e){}
+          try { localStorage.setItem(USERS_KEY, JSON.stringify(users)); } catch(e){}
+          console.log(`[WallDrop] Auto-synced ${wallpapers.length} wallpapers from GitHub DB ✓`);
+          // Skip localStorage fallback — we already have fresh data
+          await restoreSession();
+          renderGallery();
+          await loadGHConfig();
+          return;
+        }
+      }
+    } catch(e) {
+      console.warn('[WallDrop] GitHub DB auto-sync failed, falling back to localStorage:', e);
+    }
+  }
+  // ── FALLBACK: Load from localStorage (fast local cache) ──────────────────
+  try {
+    const raw = localStorage.getItem(WALLS_KEY);
+    wallpapers = raw ? JSON.parse(raw) : [...DEFAULT_WALLS];
+    if (!wallpapers.length) wallpapers = [...DEFAULT_WALLS];
+  } catch(e) { wallpapers = [...DEFAULT_WALLS]; }
+  try {
+    const raw = localStorage.getItem(USERS_KEY);
+    users = raw ? JSON.parse(raw) : [];
+  } catch(e) { users = []; }
+  if (!wallpapers.some(w=>w.id==='d1')) { try { localStorage.setItem(WALLS_KEY, JSON.stringify(wallpapers)); } catch(e){} }
+  await restoreSession();
+  renderGallery();
+  await loadGHConfig();
+}
+
+// ── Restore logged-in session (shared helper) ──
+async function restoreSession() {
+  try {
+    const saved = localStorage.getItem(SESSION_KEY);
+    if (saved) {
+      const su = JSON.parse(saved);
+      if (su.provider === 'google') {
+        // Re-upsert Google user into users array so admin panel can see them
+        const idx = users.findIndex(u => u.email === su.email);
+        if (idx > -1) {
+          users[idx] = { ...su, ...users[idx] }; // prefer stored data but fill gaps
+        } else {
+          users.push(su);
+          await saveUsers();
+        }
+        currentUser = users[idx > -1 ? idx : users.length - 1];
+        setNavUser(currentUser);
+      } else {
+        const verified = users.find(u => u.id === su.id);
+        if (verified) { currentUser = verified; setNavUser(currentUser); }
+        else localStorage.removeItem(SESSION_KEY);
+      }
+    }
+  } catch(e) { localStorage.removeItem(SESSION_KEY); }
+}
+async function saveWalls() {
+  try { localStorage.setItem(WALLS_KEY, JSON.stringify(wallpapers)); }
+  catch(e) { showToast('Storage error','error'); }
+  // Auto-push to GitHub DB repo if configured — awaited so upload flow knows when it's done
+  if (typeof ghDbWriteEnabled === 'function' && ghDbWriteEnabled()) {
+    await pushDBToGitHub(false).catch(e => console.warn('DB auto-push:', e));
+  }
+}
+async function saveUsers() {
+  try { localStorage.setItem(USERS_KEY, JSON.stringify(users)); }
+  catch(e) {}
+  if (typeof ghDbWriteEnabled === 'function' && ghDbWriteEnabled()) {
+    pushDBToGitHub(false).catch(e => console.warn('DB auto-push (users):', e));
+  }
+}
+
+// ──────────────────────────────────────────
+// VIEWS
+// ──────────────────────────────────────────
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function goHome() { showView('view-gallery'); renderGallery(); }
+function showSignIn() { showView('view-signin'); checkGoogleConfig('signin-google-notice'); }
+function showSignUp() { showView('view-signup'); checkGoogleConfig('signup-google-notice'); }
+
+function checkGoogleConfig(noticeId) {
+  if (typeof GOOGLE_CLIENT_ID === 'undefined' || GOOGLE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID') {
+    document.getElementById(noticeId).classList.add('show');
+  }
+}
+
+// ──────────────────────────────────────────
+// NAV STATE
+// ──────────────────────────────────────────
+function setNavUser(user) {
+  const actions = document.getElementById('nav-actions');
+  if (user) {
+    const initials = ((user.fname||'?')[0]+(user.lname||'')[0]||'').toUpperCase();
+    const avatarHtml = user.picture
+      ? `<img class="user-avatar" src="${user.picture}" alt="" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="user-avatar-initials" style="display:none">${initials}</div>`
+      : `<div class="user-avatar-initials">${initials}</div>`;
+    actions.innerHTML = `
+      <div class="user-pill" onclick="showUserMenu()">
+        ${avatarHtml}
+        <span class="user-name">${user.fname}${user.lname?' '+user.lname:''}</span>
+      </div>
+      <button class="btn btn-outline" style="padding:7px 16px;font-size:.83rem;" onclick="signOut()">Sign Out</button>`;
+  } else {
+    actions.innerHTML = `
+      <button class="btn btn-outline" onclick="showSignIn()">Sign In</button>
+      <button class="btn btn-fill" onclick="showSignUp()">Sign Up</button>`;
+  }
+}
+
+function showUserMenu() { showToast(`Signed in as ${currentUser.email}`,'success'); }
+
+function signOut() {
+  currentUser = null;
+  localStorage.removeItem(SESSION_KEY);
+  setNavUser(null);
+  if (typeof google !== 'undefined' && google.accounts) {
+    try { google.accounts.id.disableAutoSelect(); } catch(e){}
+  }
+  showToast('Signed out successfully.','success');
+  goHome();
+}
+
+// ──────────────────────────────────────────
+// GOOGLE AUTH
+// ──────────────────────────────────────────
+function initGoogleAuth() {
+  if (typeof google === 'undefined' || !google.accounts) return;
+  google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: handleGoogleCredential,
+    auto_select: false,
+    cancel_on_tap_outside: true,
+  });
+  renderGoogleButtons();
+}
+function renderGoogleButtons() {
+  const cfg = { theme:'filled_black', size:'large', width:360, shape:'rectangular', logo_alignment:'left' };
+  const si = document.getElementById('g-signin-btn');
+  const su = document.getElementById('g-signup-btn');
+  if (si) google.accounts.id.renderButton(si, { ...cfg, text:'signin_with' });
+  if (su) google.accounts.id.renderButton(su, { ...cfg, text:'signup_with' });
+}
+window.addEventListener('load', () => {
+  if (typeof GOOGLE_CLIENT_ID === 'undefined' || GOOGLE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID') return;
+  if (typeof google !== 'undefined' && google.accounts) initGoogleAuth();
+});
+
+async function handleGoogleCredential(response) {
+  try {
+    const base64Url = response.credential.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(atob(base64));
+    const user = {
+      id: 'g_' + payload.sub,
+      fname: payload.given_name || payload.name.split(' ')[0],
+      lname: payload.family_name || '',
+      email: payload.email,
+      picture: payload.picture,
+      provider: 'google',
+      createdAt: Date.now()
+    };
+    // Always upsert: update existing record (e.g. new profile picture) or add new
+    const idx = users.findIndex(u => u.email === user.email);
+    if (idx > -1) {
+      users[idx] = { ...users[idx], ...user }; // keep createdAt if exists
+      users[idx].createdAt = users[idx].createdAt || user.createdAt;
+    } else {
+      users.push(user);
+    }
+    await saveUsers();
+    currentUser = users[idx > -1 ? idx : users.length - 1];
+    localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+    setNavUser(currentUser);
+    goHome();
+    showToast(`Welcome, ${currentUser.fname}! 🎉`, 'success');
+  } catch(e) { console.error(e); showToast('Google sign-in failed.','error'); }
+}
+
+// ──────────────────────────────────────────
+// EMAIL AUTH HELPERS
+// ──────────────────────────────────────────
+function hashPass(p) {
+  // Simple hash for demo — use bcrypt/argon2 in real backends
+  let h = 0;
+  for (let i = 0; i < p.length; i++) { h = Math.imul(31, h) + p.charCodeAt(i) | 0; }
+  return 'h_' + Math.abs(h).toString(16) + '_' + p.length;
+}
+
+function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+function togglePw(id, icon) {
+  const inp = document.getElementById(id);
+  const show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password';
+  icon.textContent = show ? '🙈' : '👁';
+}
+
+function setErr(id, msg, show) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (msg !== '') el.textContent = msg;
+  el.style.display = show ? 'block' : 'none';
+  if (show) el.classList.add('show'); else el.classList.remove('show');
+}
+
+// ──────────────────────────────────────────
+// SIGN IN
+// ──────────────────────────────────────────
+async function doSignIn() {
+  const email = document.getElementById('si-email').value.trim();
+  const pass  = document.getElementById('si-password').value;
+  let ok = true;
+  if (!isValidEmail(email)) { setErr('si-email-err','Invalid email.',true); ok=false; } else setErr('si-email-err','',false);
+  if (!pass) { setErr('si-pass-err','Enter your password.',true); ok=false; } else setErr('si-pass-err','',false);
+  if (!ok) return;
+
+  const btn = document.getElementById('signin-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Signing in…'; }
+
+  try {
+    const resp = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pass }),
+    });
+    const data = await resp.json().catch(() => ({}));
+
+    if (resp.ok && data.ok) {
+      if (data.is_admin) {
+        goHome();
+        document.getElementById('admin-panel').classList.add('open');
+        document.body.style.overflow = 'hidden';
+        showR2Status(); updateAdminStats(); renderManageGrid(); renderUsersTable(); loadAnalytics(); loadGeminiKeyUI();
+        showToast('Welcome, Admin! 🛡️', 'success');
+      } else {
+        currentUser = data.user;
+        localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+        setNavUser(currentUser);
+        goHome();
+        showToast(`Welcome back, ${data.user.fname}! 👋`, 'success');
+      }
+    } else {
+      const msg = data.error || 'Incorrect email or password.';
+      setErr('si-pass-err', msg, true);
+      document.getElementById('si-password').classList.add('err');
+      setTimeout(() => document.getElementById('si-password').classList.remove('err'), 1400);
+    }
+  } catch(e) {
+    setErr('si-pass-err', 'Network error. Please try again.', true);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Sign In'; }
+  }
+}
+
+document.getElementById('si-password').addEventListener('keydown', e => { if(e.key==='Enter') doSignIn(); });
+
+function showForgot(e) {
+  e.preventDefault();
+  showToast('Password reset: contact support@walldrop.com','error');
+}
+
+// ──────────────────────────────────────────
+// SIGN UP
+// ──────────────────────────────────────────
+function checkStrength(pw) {
+  const str = document.getElementById('pw-strength');
+  if (!pw) { str.classList.remove('show'); return; }
+  str.classList.add('show');
+  const bars = [document.getElementById('bar1'),document.getElementById('bar2'),document.getElementById('bar3'),document.getElementById('bar4')];
+  const label = document.getElementById('pw-label');
+  bars.forEach(b=>{ b.className='pw-bar'; b.style.background=''; });
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  const cls = score<=1?'weak':score<=2?'medium':'strong';
+  const labels = {weak:'Weak',medium:'Fair',strong:score===4?'Very strong':'Strong'};
+  const colors = {weak:'rgba(255,80,80,.7)',medium:'rgba(255,180,0,.7)',strong:'rgba(60,200,100,.7)'};
+  for (let i=0;i<score;i++) bars[i].style.background = colors[cls];
+  label.textContent = labels[cls];
+  label.style.color = colors[cls];
+}
+
+async function doSignUp() {
+  const fname = document.getElementById('su-fname').value.trim();
+  const lname = document.getElementById('su-lname').value.trim();
+  const email = document.getElementById('su-email').value.trim();
+  const pass  = document.getElementById('su-password').value;
+  const terms = document.getElementById('su-terms').checked;
+  let ok = true;
+
+  if (!fname) { setErr('su-fname-err','First name required.',true); ok=false; } else setErr('su-fname-err','',false);
+  if (!isValidEmail(email)) { setErr('su-email-err','Enter a valid email.',true); ok=false; } else {
+    if (users.find(u=>u.email===email)) { setErr('su-email-err','Email already registered.',true); ok=false; }
+    else setErr('su-email-err','',false);
+  }
+  if (pass.length < 8) { setErr('su-pass-err','Min. 8 characters.',true); ok=false; } else setErr('su-pass-err','',false);
+  if (!terms) { setErr('su-terms-err','Please accept terms.',true); ok=false; } else setErr('su-terms-err','',false);
+  if (!ok) return;
+
+  const user = { id:'e_'+Date.now(), fname, lname, email, passwordHash:hashPass(pass), provider:'email', createdAt:Date.now() };
+  users.push(user);
+  await saveUsers();
+  currentUser = user;
+  localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+  setNavUser(currentUser);
+  goHome();
+  pushActivity('signup', fname+' '+lname);
+  showToast(`Account created! Welcome, ${fname}! 🎉`,'success');
+}
+
+document.getElementById('su-password').addEventListener('keydown', e => { if(e.key==='Enter') doSignUp(); });
+
+// ──────────────────────────────────────────
+// GALLERY
+// ──────────────────────────────────────────
+const dlIcon = `<svg viewBox="0 0 24 24"><path d="M12 16l-6-6h4V4h4v6h4l-6 6zm-8 4h16v-2H4v2z"/></svg>`;
+const heartIcon = `<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`;
+
+function cardHTML(w, idx) {
+  const favs = currentUser ? (currentUser.favs||[]) : [];
+  const isFav = favs.includes(w.id);
+  return `<div class="wall-card" style="animation-delay:${idx*.07}s" onclick="openLightbox('${w.id}')">
+    <img src="${w.thumb||w.src}" alt="${w.tag}" loading="lazy">
+    <div class="card-overlay">
+      <div class="card-meta">
+        <span class="card-tag">${w.tag}</span>
+        <div style="display:flex;gap:6px;align-items:center;">
+          ${currentUser?`<button class="card-fav${isFav?' active':''}" title="Favourite" onclick="event.stopPropagation();toggleFav('${w.id}',this)">${heartIcon}</button>`:''}
+          <div class="card-dl" title="Download" onclick="event.stopPropagation();downloadWall('${w.id}')">${dlIcon}</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderGallery() {
+  const filtered = activeCat==='all'?wallpapers:wallpapers.filter(w=>w.cat===activeCat);
+  const row1=filtered.slice(0,4), row2=filtered.slice(4);
+  document.getElementById('grid-row1').innerHTML=row1.length
+    ?row1.map((w,i)=>cardHTML(w,i)).join('')
+    :'<div style="grid-column:1/-1;text-align:center;padding:50px;color:rgba(255,255,255,.3);font-size:.95rem;">No wallpapers in this category.</div>';
+  document.getElementById('grid-row2').innerHTML=row2.map((w,i)=>cardHTML(w,i+4)).join('');
+}
+
+document.getElementById('cats').addEventListener('click', e => {
+  const p=e.target.closest('.cat-pill'); if(!p) return;
+  document.querySelectorAll('.cat-pill').forEach(x=>x.classList.remove('active'));
+  p.classList.add('active'); activeCat=p.dataset.cat; renderGallery();
+});
+
+// ──────────────────────────────────────────
+// FAVOURITES
+// ──────────────────────────────────────────
+function toggleFav(id, btn) {
+  if (!currentUser) { showSignIn(); return; }
+  if (!currentUser.favs) currentUser.favs = [];
+  const idx = currentUser.favs.indexOf(id);
+  if (idx > -1) { currentUser.favs.splice(idx,1); btn.classList.remove('active'); }
+  else { currentUser.favs.push(id); btn.classList.add('active'); showToast('Added to favourites ❤','success'); }
+  // Update stored user
+  const ui = users.findIndex(u=>u.id===currentUser.id);
+  if (ui>-1) { users[ui]=currentUser; saveUsers(); }
+}
+
+// ──────────────────────────────────────────
+// LIGHTBOX
+// ──────────────────────────────────────────
+function openLightbox(id) {
+  const w=wallpapers.find(x=>x.id===id); if(!w) return;
+  document.getElementById('lb-img').src=w.src;
+  const lbDl = document.getElementById('lb-dl');
+  lbDl.href='#';
+  lbDl.onclick = async (e) => {
+    e.preventDefault();
+    recordDownload(w.id, w.cat, w.title);
+    await triggerDownload(w.src, w.title || w.tag || 'wallpaper');
+  };
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
+document.getElementById('lightbox').addEventListener('click',e=>{if(e.target===document.getElementById('lightbox'))closeLightbox();});
+
+async function downloadWall(id) {
+  const w = wallpapers.find(x => x.id === id);
+  if (!w) return;
+  recordDownload(w.id, w.cat, w.title);
+  await triggerDownload(w.src, w.title || w.tag || 'wallpaper');
+}
+
+// Convert jsDelivr CDN URL to raw.githubusercontent.com URL (has proper CORS headers)
+function toRawGitHubUrl(url) {
+  // https://cdn.jsdelivr.net/gh/USER/REPO@BRANCH/path -> https://raw.githubusercontent.com/USER/REPO/BRANCH/path
+  const m = url.match(/^https:\/\/cdn\.jsdelivr\.net\/gh\/([^\/]+)\/([^@]+)@([^\/]+)\/(.+)$/);
+  if (m) return `https://raw.githubusercontent.com/${m[1]}/${m[2]}/${m[3]}/${m[4]}`;
+  return url;
+}
+
+async function triggerDownload(src, titleRaw) {
+  showToast('\u2b07 Downloading…', 'success');
+  const safeTitle = (titleRaw || 'wallpaper').toString();
+  const ext = (src.split('.').pop().split('?')[0] || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+  const fname = safeTitle.replace(/[^a-z0-9_\-]/gi, '_') + '.' + ext;
+
+  // Try fetching via raw GitHub URL first (CORS-friendly)
+  const fetchUrl = toRawGitHubUrl(src);
+  try {
+    const resp = await fetch(fetchUrl);
+    if (!resp.ok) throw new Error('fetch ' + resp.status);
+    const blob = await resp.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = fname;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+    return;
+  } catch (e) {
+    console.warn('Direct fetch failed, trying proxy…', e);
+  }
+
+  // Fallback: use a CORS proxy to fetch the blob
+  try {
+    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(src);
+    const resp = await fetch(proxyUrl);
+    if (!resp.ok) throw new Error('proxy ' + resp.status);
+    const blob = await resp.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = fname;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+    return;
+  } catch (e) {
+    console.warn('Proxy fetch also failed…', e);
+  }
+
+  // Last resort: open in new tab
+  window.open(src, '_blank');
+  showToast('\u26a0 Opened in new tab — right-click → Save image', 'error');
+}
+
+// ──────────────────────────────────────────
+// ADMIN
+// ──────────────────────────────────────────
+
+// ── AI Key UI (dual-provider) ──
+function updateGeminiStatus() {
+  const badge = document.getElementById('gemini-status-badge');
+  if (!badge) return;
+  const p = getAIProvider();
+  if (p === 'puter') {
+    badge.style.background='rgba(255,184,0,.12)'; badge.style.border='1px solid rgba(255,184,0,.35)'; badge.style.color='rgba(255,220,100,1)';
+    badge.textContent='✦ Puter Ready'; return;
+  }
+  const k = p === 'gemini'
+    ? (document.getElementById('gemini-key-input')?.value.trim() || getGeminiKey())
+    : (document.getElementById('or-key-input')?.value.trim()     || getAIKey());
+  if (k && k.length > 10) {
+    badge.style.background='rgba(60,200,100,.12)'; badge.style.border='1px solid rgba(60,200,100,.35)'; badge.style.color='rgba(80,220,120,1)';
+    badge.textContent='✓ Key Set';
+  } else {
+    badge.style.background='rgba(255,100,100,.1)'; badge.style.border='1px solid rgba(255,100,100,.25)'; badge.style.color='rgba(255,130,130,1)';
+    badge.textContent='⚠ Not Set';
+  }
+}
+function saveGeminiKeyUI() {
+  const res = document.getElementById('gemini-key-result');
+  const p   = getAIProvider();
+  const inp = p === 'gemini' ? document.getElementById('gemini-key-input') : document.getElementById('or-key-input');
+  const k   = inp ? inp.value.trim() : '';
+  if (!k) {
+    if (p === 'gemini') saveGeminiKey(''); else saveAIKey('');
+    res.style.display='block'; res.style.background='rgba(255,80,80,.1)'; res.style.color='rgba(255,130,130,1)'; res.textContent='Key removed.';
+  } else {
+    if (p === 'gemini') saveGeminiKey(k); else saveAIKey(k);
+    const label = p === 'gemini' ? 'Gemini' : 'OpenRouter';
+    res.style.display='block'; res.style.background='rgba(60,200,100,.08)'; res.style.color='rgba(80,220,120,1)';
+    res.textContent=`✓ ${label} key saved! Drop any image to auto-detect category, title, and description.`;
+  }
+  updateGeminiStatus();
+  setTimeout(()=>{ if(res) res.style.display='none'; }, 4000);
+}
+function loadGeminiKeyUI() {
+  const p = getAIProvider();
+  const gInp  = document.getElementById('gemini-key-input');
+  const orInp = document.getElementById('or-key-input');
+  if (gInp)  { const k = getGeminiKey(); if (k) gInp.value  = k; }
+  if (orInp) { const k = getAIKey();     if (k) orInp.value = k; }
+  switchProvider(p);
+}
+
+async function testAIKey() {
+  const res = document.getElementById('gemini-key-result');
+  if (!res) return;
+  const p = getAIProvider();
+  if (p === 'puter') {
+    res.style.display='block'; res.style.background='rgba(255,184,0,.08)'; res.style.color='rgba(255,220,100,1)';
+    res.textContent='✦ Puter.ai requires no API key — just drop an image to test!';
+    setTimeout(()=>{ res.style.display='none'; }, 4000);
+    return;
+  }
+  const k = p === 'gemini'
+    ? (document.getElementById('gemini-key-input')?.value.trim() || getGeminiKey())
+    : (document.getElementById('or-key-input')?.value.trim()     || getAIKey());
+  if (!k) {
+    res.style.display='block'; res.style.background='rgba(255,80,80,.1)'; res.style.color='rgba(255,130,130,1)';
+    res.textContent=`⚠ No key entered. Paste your ${p === 'gemini' ? 'Gemini' : 'OpenRouter'} key first.`; return;
+  }
+  res.style.display='block'; res.style.background='rgba(255,255,255,.04)'; res.style.color='rgba(255,255,255,.5)';
+  res.textContent=`🔍 Testing ${p === 'gemini' ? 'Gemini' : 'OpenRouter'} key…`;
+  try {
+    if (p === 'gemini') {
+      // Gemini test — simple text-only ping (no image needed for key validation)
+      const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${k}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: 'hi' }] }], generationConfig: { maxOutputTokens: 5 } })
+      });
+      const data = await resp.json().catch(()=>({}));
+      if (resp.ok) {
+        res.style.background='rgba(60,200,100,.08)'; res.style.color='rgba(80,220,120,1)';
+        res.textContent='✅ Gemini key works! AI auto-detection is ready. (1,500 req/day free)';
+      } else if (resp.status === 400 && (data?.error?.message?.includes('API_KEY_INVALID') || data?.error?.message?.includes('API key not valid'))) {
+        res.style.background='rgba(255,80,80,.1)'; res.style.color='rgba(255,130,130,1)';
+        res.textContent='❌ Invalid Gemini key. Go to aistudio.google.com → Get API Key and copy it again.';
+      } else if (resp.status === 403) {
+        res.style.background='rgba(255,80,80,.1)'; res.style.color='rgba(255,130,130,1)';
+        res.textContent='❌ Access denied (403). Make sure you enabled the Generative Language API in Google Cloud.';
+      } else if (resp.status === 429) {
+        const errMsg = data?.error?.message || '';
+        const isQuota = errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('exhausted') || errMsg.toLowerCase().includes('billing');
+        res.style.background='rgba(255,184,0,.1)'; res.style.color='rgba(255,220,100,1)';
+        if (isQuota) {
+          res.textContent='⚠ Key is valid but daily quota exhausted or billing not enabled. Visit aistudio.google.com to check your quota.';
+        } else {
+          res.textContent='✅ Key is valid! (Temporarily rate-limited — 15 req/min max. Wait a moment, then it will work fine.)';
+          res.style.background='rgba(60,200,100,.08)'; res.style.color='rgba(80,220,120,1)';
+        }
+      } else {
+        res.style.background='rgba(255,80,80,.1)'; res.style.color='rgba(255,130,130,1)';
+        res.textContent=`❌ Error ${resp.status}: ${data?.error?.message || 'Unknown error'}`;
+      }
+    } else {
+      // OpenRouter test
+      const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${k}`, 'Content-Type': 'application/json', 'HTTP-Referer': window.location.href, 'X-Title': 'WallDrop' },
+        body: JSON.stringify({ model: 'qwen/qwen2.5-vl-32b-instruct:free', messages: [{ role: 'user', content: 'hi' }], max_tokens: 1 })
+      });
+      const data = await resp.json().catch(()=>({}));
+      if (resp.ok) {
+        res.style.background='rgba(60,200,100,.08)'; res.style.color='rgba(80,220,120,1)';
+        res.textContent='✅ OpenRouter key works! AI auto-detection is ready.';
+      } else if (resp.status === 401) {
+        res.style.background='rgba(255,80,80,.1)'; res.style.color='rgba(255,130,130,1)';
+        res.textContent='❌ Invalid key (401). Copy from openrouter.ai/keys — must start with sk-or-v1-';
+      } else if (resp.status === 429) {
+        res.style.background='rgba(255,184,0,.1)'; res.style.color='rgba(255,220,100,1)';
+        res.textContent='⚠ Key works but rate-limited (429). Hit 20 req/min or 200/day limit. Wait and retry.';
+      } else {
+        res.style.background='rgba(255,80,80,.1)'; res.style.color='rgba(255,130,130,1)';
+        res.textContent=`❌ Status ${resp.status}: ${data?.error?.message || JSON.stringify(data).slice(0,100)}`;
+      }
+    }
+  } catch(e) {
+    res.style.background='rgba(255,80,80,.1)'; res.style.color='rgba(255,130,130,1)';
+    res.textContent=`❌ Network error: ${e.message}`;
+  }
+  res.style.display='block';
+}
+function openAdminLogin() {
+  const m=document.getElementById('admin-modal'); m.style.display='flex';
+  setTimeout(()=>document.getElementById('adm-user').focus(),100);
+}
+function closeAdminModal() { document.getElementById('admin-modal').style.display='none'; }
+document.getElementById('admin-modal').addEventListener('click',e=>{if(e.target===document.getElementById('admin-modal'))closeAdminModal();});
+
+async function tryAdminLogin() {
+  const u=document.getElementById('adm-user').value.trim();
+  const p=document.getElementById('adm-pass').value;
+  const err=document.getElementById('adm-err');
+  err.style.display='none'; err.classList.remove('show');
+
+  try {
+    const resp = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: u, password: p }),
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (resp.ok && data.ok && data.is_admin) {
+      closeAdminModal();
+      document.getElementById('admin-panel').classList.add('open');
+      document.body.style.overflow='hidden';
+      showR2Status(); updateAdminStats(); renderManageGrid(); renderUsersTable(); loadAnalytics();
+      loadGeminiKeyUI();
+    } else {
+      err.style.display='block'; err.classList.add('show');
+      document.getElementById('adm-pass').classList.add('err');
+      setTimeout(()=>{
+        document.getElementById('adm-pass').classList.remove('err');
+      }, 1400);
+    }
+  } catch(e) {
+    err.textContent = 'Network error. Please try again.';
+    err.style.display='block'; err.classList.add('show');
+  }
+}
+
+function closeAdminPanel() { document.getElementById('admin-panel').classList.remove('open'); document.body.style.overflow=''; }
+function adminLogout() {
+  closeAdminPanel();
+  document.getElementById('adm-user').value='';
+  document.getElementById('adm-pass').value='';
+  const err = document.getElementById('adm-err');
+  if (err) { err.style.display='none'; err.classList.remove('show'); }
+}
+
+function showR2Status() {
+  const badge = document.getElementById('r2-status-badge');
+  if (badge) badge.style.display = r2Enabled() ? 'inline-block' : 'none';
+  const ghBadge = document.getElementById('github-status-badge');
+  if (ghBadge) {
+    ghBadge.style.display = githubEnabled() ? 'inline-block' : 'none';
+  }
+}
+
+function updateAdminStats() {
+  const cats={};
+  wallpapers.forEach(w=>{cats[w.cat]=(cats[w.cat]||0)+1;});
+  const top=Object.entries(cats).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('admin-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-value">${wallpapers.length}</div><div class="stat-label">Total Wallpapers</div></div>
+    <div class="stat-card"><div class="stat-value">${wallpapers.filter(w=>!w.isDefault).length}</div><div class="stat-label">Uploaded by You</div></div>
+    <div class="stat-card"><div class="stat-value">${users.length}</div><div class="stat-label">Registered Users</div></div>
+    <div class="stat-card"><div class="stat-value">${top?top[0].charAt(0).toUpperCase()+top[0].slice(1):'—'}</div><div class="stat-label">Top Category</div></div>`;
+}
+
+// Upload tabs
+document.querySelectorAll('.upload-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.upload-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-url').style.display=tab.dataset.tab==='url'?'':'none';
+    document.getElementById('tab-file').style.display=tab.dataset.tab==='file'?'':'none';
+  });
+});
+
+async function doUrlUpload() {
+  const url=document.getElementById('up-url').value.trim();
+  const title=document.getElementById('up-title').value.trim();
+  const cat=document.getElementById('up-cat').value;
+  if (!url) { showToast('Enter an image URL.','error'); return; }
+  const btn=document.getElementById('btn-url-upload'); btn.disabled=true; btn.textContent='Adding…';
+  const tag=cat.charAt(0).toUpperCase()+cat.slice(1);
+  const uploadedTitle = document.getElementById('up-title').value.trim() || tag;
+  wallpapers.unshift({id:'u'+Date.now(),src:url,thumb:url,cat,tag,title:title||tag,isDefault:false});
+  await saveWalls(); renderGallery(); renderManageGrid(); updateAdminStats();
+  document.getElementById('up-url').value=''; document.getElementById('up-title').value='';
+  btn.disabled=false; btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg> Add Wallpaper';
+  pushActivity('upload', uploadedTitle); showToast('✓ Wallpaper added!','success');
+}
+
+const fileInput=document.getElementById('file-input');
+const dropZone=document.getElementById('drop-zone');
+dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('drag-over');});
+dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('drag-over');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0]);});
+fileInput.addEventListener('change',()=>{if(fileInput.files[0])handleFile(fileInput.files[0]);});
+
+let currentFile = null;
+
+// ══════════════════════════════════════════════════════════════════════════════
+// AI IMAGE ANALYZER — Gemini (primary) + OpenRouter (fallback)
+// Both are FREE, no credit card needed.
+// Gemini: https://aistudio.google.com  |  OpenRouter: https://openrouter.ai
+// ══════════════════════════════════════════════════════════════════════════════
+
+const AI_KEY_LS      = 'walldrop-ai-key';
+const GEMINI_KEY_LS  = 'walldrop-gemini-key';
+const AI_PROVIDER_LS = 'walldrop-ai-provider';
+
+function getAIKey()       { return localStorage.getItem(AI_KEY_LS) || ''; }
+function saveAIKey(k)     { k ? localStorage.setItem(AI_KEY_LS, k.trim()) : localStorage.removeItem(AI_KEY_LS); }
+function getGeminiKey()   { return localStorage.getItem(GEMINI_KEY_LS) || ''; }
+function saveGeminiKey(k) { k ? localStorage.setItem(GEMINI_KEY_LS, k.trim()) : localStorage.removeItem(GEMINI_KEY_LS); }
+function getAIProvider()  { return localStorage.getItem(AI_PROVIDER_LS) || 'gemini'; }
+function saveAIProvider(p){ localStorage.setItem(AI_PROVIDER_LS, p); }
+
+// ── Switch provider tab in Admin UI ──
+function switchProvider(p) {
+  saveAIProvider(p);
+  document.getElementById('ai-fields-gemini').style.display     = p === 'gemini'     ? '' : 'none';
+  document.getElementById('ai-fields-openrouter').style.display = p === 'openrouter' ? '' : 'none';
+  document.getElementById('ai-fields-puter').style.display      = p === 'puter'      ? '' : 'none';
+  const btnG  = document.getElementById('provider-btn-gemini');
+  const btnOR = document.getElementById('provider-btn-openrouter');
+  const btnP  = document.getElementById('provider-btn-puter');
+  // Reset all
+  [btnG, btnOR, btnP].forEach(b => { if(b){ b.style.borderColor='rgba(255,255,255,.12)'; b.style.background='rgba(255,255,255,.04)'; b.style.color='rgba(255,255,255,.45)'; }});
+  if (p === 'gemini') {
+    btnG.style.borderColor='rgba(66,200,120,.5)'; btnG.style.background='rgba(66,200,120,.12)'; btnG.style.color='rgba(100,230,150,1)';
+  } else if (p === 'openrouter') {
+    btnOR.style.borderColor='rgba(120,160,255,.5)'; btnOR.style.background='rgba(120,160,255,.12)'; btnOR.style.color='rgba(150,180,255,1)';
+  } else if (p === 'puter') {
+    btnP.style.borderColor='rgba(255,184,0,.5)'; btnP.style.background='rgba(255,184,0,.12)'; btnP.style.color='rgba(255,220,100,1)';
+  }
+  updateGeminiStatus();
+}
+
+// ── Ensure a category option exists in both dropdowns; create pill if new ──
+function ensureCategoryOption(catValue) {
+  const catLabel = catValue.charAt(0).toUpperCase() + catValue.slice(1).replace(/_/g,' ');
+  // Add option to both category dropdowns
+  ['up-cat','up-cat-file'].forEach(selId => {
+    const sel = document.getElementById(selId);
+    if (!sel) return;
+    if (![...sel.options].some(o => o.value === catValue)) {
+      const opt = document.createElement('option');
+      opt.value = catValue; opt.textContent = catLabel;
+      sel.appendChild(opt);
+    }
+    sel.value = catValue;
+  });
+  // Add filter pill only once
+  const catsEl = document.getElementById('cats');
+  if (catsEl && !catsEl.querySelector(`[data-cat="${catValue}"]`)) {
+    const pill = document.createElement('button');
+    pill.className = 'cat-pill';
+    pill.dataset.cat = catValue;
+    pill.textContent = catLabel;
+    catsEl.appendChild(pill);
+  }
+}
+
+// ── Resize image for faster API calls ──
+function resizeBase64(dataUrl, maxPx = 768) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const ratio = Math.min(maxPx / img.width, maxPx / img.height, 1);
+      const w = Math.round(img.width * ratio), h = Math.round(img.height * ratio);
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(c.toDataURL('image/jpeg', 0.85));
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
+// ── Free vision models on OpenRouter — verified May 2026 ──
+const OR_VISION_MODELS = [
+  'meta-llama/llama-4-maverick:free',              // Llama 4 Maverick — multimodal vision
+  'meta-llama/llama-4-scout:free',                 // Llama 4 Scout — multimodal vision
+  'google/gemma-3-27b-it:free',                    // Gemma 3 27B — vision capable
+  'google/gemma-3-12b-it:free',                    // Gemma 3 12B — vision capable
+  'mistralai/mistral-small-3.1-24b-instruct:free', // Mistral Small 3.1 — vision
+  'qwen/qwen2.5-vl-72b-instruct:free',             // Qwen 2.5 VL 72B — strong vision model
+  'qwen/qwen2.5-vl-32b-instruct:free',             // Qwen 2.5 VL 32B — vision model
+  'microsoft/phi-4-multimodal-instruct:free',      // Phi-4 Multimodal — vision capable
+];
+
+const AI_PROMPT = `Analyze this wallpaper image. Reply with ONLY a raw JSON object, no markdown, no explanation.
+
+{
+  "category": "single lowercase word — best fit from: nature, space, city, abstract, minimal, animals, cars, anime, dark, aesthetic, architecture, underwater, fantasy, retro, food, sports, mountains, sunset, ocean — or invent one word that fits",
+  "title": "creative 2-4 word title for this specific image",
+  "description": "one sentence 15-25 words: describe colors, mood, and main subject for a wallpaper gallery"
+}
+
+JSON only. No other text.`;
+
+async function callOpenRouterModel(model, dataUrl, key) {
+  const body = {
+    model,
+    messages: [{
+      role: 'user',
+      content: [
+        { type: 'image_url', image_url: { url: dataUrl } },
+        { type: 'text', text: AI_PROMPT }
+      ]
+    }],
+    max_tokens: 250,
+    temperature: 0.3
+  };
+  const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${key}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': window.location.href,
+      'X-Title': 'WallDrop'
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    const status = resp.status;
+    const msg = err?.error?.message || String(status);
+    if (status === 401) throw new Error(msg); // bad key — stop immediately
+    if (status === 429) throw new Error('RATE_LIMIT'); // rate limit — pause then try next
+    throw new Error('TRY_NEXT'); // 404, 402, 500, etc — skip to next model
+  }
+
+  const data = await resp.json();
+  const text = (data?.choices?.[0]?.message?.content || '').trim();
+  if (!text) throw new Error('TRY_NEXT');
+
+  // Parse JSON — strip any accidental fences
+  const clean = text.replace(/```json|```/gi, '').trim();
+  // Find the JSON object inside the response
+  const jsonMatch = clean.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('TRY_NEXT');
+  const parsed = JSON.parse(jsonMatch[0]);
+
+  parsed.category = (parsed.category || 'other').toLowerCase().trim().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') || 'other';
+  if (!parsed.title) parsed.title = 'Untitled Wallpaper';
+  if (!parsed.description) parsed.description = 'A stunning wallpaper for your desktop.';
+  parsed._model = model;
+  return parsed;
+}
+
+// ── Puter.ai vision models (all except gemini/openrouter) ──
+const PUTER_VISION_MODELS = [
+  'claude-sonnet-4-5',
+  'claude-opus-4-5',
+  'gpt-4o',
+  'gpt-4o-mini',
+  'o1',
+  'meta-llama/llama-4-maverick',
+  'meta-llama/llama-4-scout',
+  'google/gemma-3-27b-it',
+  'mistral/mistral-small-3.1',
+];
+
+async function analyzeImagePuter(dataUrl) {
+  for (let i = 0; i < PUTER_VISION_MODELS.length; i++) {
+    const model = PUTER_VISION_MODELS[i];
+    try {
+      setAiBadge(`✦ Puter ${i + 1}/${PUTER_VISION_MODELS.length}…`, 'rgba(255,184,0,0.85)', '#1a1000');
+      const response = await puter.ai.chat(
+        AI_PROMPT,
+        dataUrl,
+        { model }
+      );
+      const text = (typeof response === 'string' ? response : response?.message?.content?.[0]?.text || response?.toString() || '').trim();
+      if (!text) throw new Error('TRY_NEXT');
+      const clean = text.replace(/```json|```/gi, '').trim();
+      const jsonMatch = clean.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('TRY_NEXT');
+      const parsed = JSON.parse(jsonMatch[0]);
+      parsed.category = (parsed.category || 'other').toLowerCase().trim().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') || 'other';
+      if (!parsed.title) parsed.title = 'Untitled Wallpaper';
+      if (!parsed.description) parsed.description = 'A stunning wallpaper for your desktop.';
+      parsed._model = model;
+      return parsed;
+    } catch(e) {
+      if (i < PUTER_VISION_MODELS.length - 1) {
+        setAiBadge(`✦ Trying next Puter model…`, 'rgba(255,184,0,0.75)', '#1a1000');
+        await new Promise(r => setTimeout(r, 500));
+      }
+      continue;
+    }
+  }
+  throw new Error('All Puter models unavailable. Try again or switch providers.');
+}
+
+// ── Gemini direct vision call ──
+async function analyzeImageGemini(dataUrl) {
+  const key = getGeminiKey();
+  if (!key) throw new Error('NO_KEY');
+  // Convert dataUrl to base64 parts
+  const [header, b64data] = dataUrl.split(',');
+  const mimeMatch = header.match(/data:([^;]+)/);
+  const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+  const body = {
+    contents: [{
+      parts: [
+        { inline_data: { mime_type: mimeType, data: b64data } },
+        { text: AI_PROMPT }
+      ]
+    }],
+    generationConfig: { maxOutputTokens: 300, temperature: 0.3 }
+  };
+  const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(()=>({}));
+    if (resp.status === 401 || resp.status === 400) throw new Error('Invalid Gemini key. Check aistudio.google.com → Get API Key.');
+    if (resp.status === 429) throw new Error('Gemini rate limited. Wait a moment and try again.');
+    throw new Error(`Gemini error ${resp.status}: ${err?.error?.message || 'Unknown'}`);
+  }
+  const data = await resp.json();
+  const text = (data?.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+  if (!text) throw new Error('Empty response from Gemini.');
+  const clean = text.replace(/```json|```/gi, '').trim();
+  const jsonMatch = clean.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('Could not parse Gemini response as JSON.');
+  const parsed = JSON.parse(jsonMatch[0]);
+  parsed.category = (parsed.category || 'other').toLowerCase().trim().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') || 'other';
+  if (!parsed.title) parsed.title = 'Untitled Wallpaper';
+  if (!parsed.description) parsed.description = 'A stunning wallpaper for your desktop.';
+  parsed._model = 'gemini-2.0-flash';
+  return parsed;
+}
+
+async function analyzeImage(dataUrl) {
+  const provider = getAIProvider();
+
+  if (provider === 'puter') {
+    return await analyzeImagePuter(dataUrl);
+  }
+
+  if (provider === 'gemini') {
+    return await analyzeImageGemini(dataUrl);
+  }
+
+  // OpenRouter fallback
+  const key = getAIKey();
+  if (!key) throw new Error('NO_KEY');
+
+  for (let i = 0; i < OR_VISION_MODELS.length; i++) {
+    const model = OR_VISION_MODELS[i];
+    try {
+      setAiBadge(`✦ Trying ${i + 1}/${OR_VISION_MODELS.length}…`, 'rgba(100,160,255,0.92)', '#0a1020');
+      const result = await callOpenRouterModel(model, dataUrl, key);
+      return result;
+    } catch(e) {
+      if (e.message === 'TRY_NEXT') {
+        if (i < OR_VISION_MODELS.length - 1) {
+          setAiBadge(`✦ Model ${i + 1} unavailable, trying next…`, 'rgba(255,184,0,0.85)', '#1a1000');
+          await new Promise(r => setTimeout(r, 600));
+        }
+        continue;
+      }
+      if (e.message === 'RATE_LIMIT') {
+        if (i < OR_VISION_MODELS.length - 1) {
+          setAiBadge(`✦ Rate limited, trying next model…`, 'rgba(255,140,0,0.9)', '#1a0800');
+          await new Promise(r => setTimeout(r, 1500));
+        }
+        continue;
+      }
+      // 401 bad key — surface immediately
+      throw new Error('Invalid API key. Go to openrouter.ai/keys and copy your key again.');
+    }
+  }
+  throw new Error('All models unavailable right now. Wait 2 min and retry (free limit: 20 req/min, 200/day).');
+}
+
+// ── AI badge on drop zone ──
+function setAiBadge(text, color='rgba(80,200,120,0.95)', textColor='#071a0e') {
+  const dz = document.getElementById('drop-zone');
+  let badge = dz.querySelector('.ai-badge');
+  if (!badge) {
+    badge = document.createElement('div');
+    badge.className = 'ai-badge';
+    badge.style.cssText = 'position:absolute;top:8px;right:10px;font-size:.65rem;font-weight:800;letter-spacing:.06em;padding:3px 10px;border-radius:20px;pointer-events:none;z-index:5;transition:all .3s;';
+    dz.appendChild(badge);
+  }
+  badge.style.background = color;
+  badge.style.color = textColor;
+  badge.textContent = text;
+}
+
+function handleFile(file) {
+  if (!file.type.startsWith('image/')) { showToast('Select an image file.', 'error'); return; }
+  if (file.size > 4*1024*1024) { showToast('Max file size is 4MB.', 'error'); return; }
+  currentFile = file;
+  const r = new FileReader();
+  r.onload = async e => {
+    fileBase64 = e.target.result;
+    const p = document.getElementById('drop-preview');
+    p.src = fileBase64; p.style.display = 'block';
+
+    // R2 badge
+    if (r2Enabled()) {
+      const dz = document.getElementById('drop-zone');
+      let badge = dz.querySelector('.r2-badge');
+      if (!badge) {
+        badge = document.createElement('div'); badge.className = 'r2-badge';
+        badge.style.cssText = 'position:absolute;bottom:8px;right:10px;background:rgba(249,130,17,0.9);color:#fff;font-size:.65rem;font-weight:700;letter-spacing:.06em;padding:2px 8px;border-radius:20px;pointer-events:none;z-index:5;';
+        badge.textContent = '☁ R2'; dz.appendChild(badge);
+      }
+    }
+
+    // ── AI ANALYSIS ──
+    const provider = getAIProvider();
+    if (provider === 'puter') {
+      // Puter: no key needed
+      setAiBadge('✦ AI analyzing…', 'rgba(255,184,0,0.92)', '#1a1000');
+      showToast('🤖 Puter AI is analyzing your image…', 'success');
+    } else if (provider === 'gemini') {
+      const key = getGeminiKey();
+      if (!key) {
+        setAiBadge('⚠ Set Gemini Key below', 'rgba(255,184,0,0.9)', '#1a1000');
+        showToast('⚠ Add your free Gemini API key in Admin Panel to enable AI auto-detection!', 'error');
+        return;
+      }
+      setAiBadge('✦ AI analyzing…', 'rgba(66,200,120,0.92)', '#051a0f');
+      showToast('🤖 Gemini AI is analyzing your image…', 'success');
+    } else {
+      // OpenRouter
+      const key = getAIKey();
+      if (!key) {
+        setAiBadge('⚠ Set OpenRouter Key below', 'rgba(255,184,0,0.9)', '#1a1000');
+        showToast('⚠ Add your free OpenRouter API key in Admin Panel to enable AI auto-detection!', 'error');
+        return;
+      }
+      setAiBadge('✦ AI analyzing…', 'rgba(100,160,255,0.92)', '#0a1020');
+      showToast('🤖 AI is analyzing your image…', 'success');
+    }
+
+    try {
+      const smallDataUrl = await resizeBase64(fileBase64, 768);
+      const { category, title, description, _model } = await analyzeImage(smallDataUrl);
+
+      ensureCategoryOption(category);
+
+      const titleField = document.getElementById('up-title-file');
+      if (titleField) titleField.value = title;
+      const descField = document.getElementById('up-desc-file');
+      if (descField) descField.value = description;
+      window._autoDescription = description;
+
+      const catLabel = category.charAt(0).toUpperCase() + category.slice(1).replace(/_/g,' ');
+      const modelLabel = (_model||'').split('/')[1]?.split(':')[0] || 'AI';
+      setAiBadge(`✦ ${catLabel}`, 'rgba(80,210,130,0.95)', '#071a0e');
+      showToast(`✦ Detected: ${catLabel} — title & description auto-filled!`, 'success');
+
+    } catch(err) {
+      console.warn('AI analysis failed:', err);
+      if (err.message === 'NO_KEY') {
+        setAiBadge('⚠ No API key', 'rgba(255,184,0,0.9)', '#1a1000');
+        showToast('Add your free OpenRouter API key in the Admin Panel!', 'error');
+      } else {
+        setAiBadge('⚠ Try again', 'rgba(255,80,80,0.9)', '#fff');
+        showToast(`AI error: ${err.message}`, 'error');
+      }
+    }
+  };
+  r.readAsDataURL(file);
+}
+
+async function doFileUpload() {
+  if (!fileBase64 && !currentFile) { showToast('Select a file first.','error'); return; }
+  const title=document.getElementById('up-title-file').value.trim();
+  const cat=document.getElementById('up-cat-file').value;
+  const descField=document.getElementById('up-desc-file');
+  const description=(descField?descField.value.trim():'')||(window._autoDescription||'');
+  const btn=document.getElementById('btn-file-upload'); btn.disabled=true;
+  const tag=cat.charAt(0).toUpperCase()+cat.slice(1);
+
+  let src = fileBase64;
+  let thumb = fileBase64;
+  let storedIn = null; // 'github' | 'r2' | null (base64)
+
+  // Try GitHub first (free, unlimited)
+  if (githubEnabled() && currentFile) {
+    try {
+      btn.textContent = '📤 Uploading to GitHub…';
+      const cdnUrl = await uploadToGitHub(currentFile);
+      src = cdnUrl; thumb = cdnUrl; storedIn = 'github';
+    } catch(e) {
+      console.warn('GitHub upload failed, trying R2:', e);
+      showToast('GitHub upload failed — trying R2…','error');
+    }
+  }
+
+  // Fallback: try R2
+  if (!storedIn && r2Enabled() && currentFile) {
+    try {
+      btn.textContent = '☁ Uploading to R2…';
+      const publicUrl = await uploadToR2(currentFile);
+      src = publicUrl; thumb = publicUrl; storedIn = 'r2';
+    } catch(e) {
+      console.warn('R2 upload failed, falling back to base64:', e);
+      showToast('R2 upload failed — storing locally.','error');
+    }
+  }
+
+  if (!storedIn) btn.textContent = 'Uploading…';
+
+  wallpapers.unshift({id:'f'+Date.now(),src,thumb,cat,tag,title:title||tag,description,isDefault:false,storedIn});
+
+  // Show DB sync status while saving
+  if (ghDbWriteEnabled()) btn.textContent = '🗄 Saving to DB…';
+  await saveWalls(); renderGallery(); renderManageGrid(); updateAdminStats();
+
+  fileBase64=null; currentFile=null; window._autoDescription=null;
+  document.getElementById('drop-preview').style.display='none';
+  fileInput.value=''; document.getElementById('up-title-file').value='';
+  if(descField) descField.value='';
+  // Remove AI badge
+  const aiBadge=document.getElementById('drop-zone').querySelector('.ai-badge');
+  if(aiBadge) aiBadge.remove();
+  btn.disabled=false; btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg> Upload File';
+
+  let successMsg;
+  if (storedIn === 'github' && ghDbWriteEnabled()) {
+    successMsg = '✓ Uploaded to GitHub + DB synced! 🚀';
+  } else if (storedIn === 'github') {
+    successMsg = '✓ Uploaded to GitHub + jsDelivr CDN! 🚀';
+  } else if (storedIn === 'r2' && ghDbWriteEnabled()) {
+    successMsg = '✓ Uploaded to R2 + DB synced!';
+  } else if (storedIn === 'r2') {
+    successMsg = '✓ Uploaded to Cloudflare R2!';
+  } else {
+    successMsg = '✓ File uploaded (base64 local)!';
+  }
+  pushActivity('upload', title||'File'); showToast(successMsg,'success');
+}
+
+function renderManageGrid() {
+  const g=document.getElementById('manage-grid');
+  if (!wallpapers.length) { g.innerHTML='<p style="color:rgba(255,255,255,.3)">No wallpapers.</p>'; return; }
+  g.innerHTML=wallpapers.map(w=>`<div class="manage-card">
+    <div class="manage-card-img"><img src="${w.thumb||w.src}" alt="${w.tag}" loading="lazy"></div>
+    <div class="manage-card-body">
+      <span class="manage-card-tag">${w.tag}</span>
+      <div class="manage-card-title">${w.title||w.id}</div>
+      <button class="btn-delete" onclick="deleteWall('${w.id}')">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> Delete
+      </button>
+    </div></div>`).join('');
+}
+
+async function deleteWall(id) {
+  if (!confirm('Delete this wallpaper?')) return;
+  const wall = wallpapers.find(w=>w.id===id);
+  wallpapers=wallpapers.filter(w=>w.id!==id);
+  await saveWalls(); renderGallery(); renderManageGrid(); updateAdminStats();
+  // Clean up remote storage
+  if (wall && wall.src) {
+    if (wall.storedIn === 'github') { await deleteFromGitHub(wall.src); }
+    else if (wall.storedIn === 'r2') { await deleteFromR2(wall.src); }
+  }
+  showToast('Deleted.','success');
+}
+
+
+// ──────────────────────────────────────────
+// ADMIN – USERS TABLE
+// ──────────────────────────────────────────
+async function renderUsersTable() {
+  // Always reload from storage to get freshest data
+  try {
+    const raw = localStorage.getItem(USERS_KEY);
+    if (raw) users = JSON.parse(raw);
+  } catch(e) {}
+  const wrap = document.getElementById('users-table-wrap');
+  if (!wrap) return;
+  const q = (document.getElementById('user-search')?.value || '').toLowerCase();
+  const filtered = users.filter(u =>
+    (u.fname+' '+u.lname+' '+u.email).toLowerCase().includes(q)
+  );
+  if (!filtered.length) {
+    wrap.innerHTML = `<div class="users-empty">${users.length ? 'No users match your search.' : 'No registered users yet.'}</div>`;
+    return;
+  }
+  const rows = filtered.map(u => {
+    const initials = ((u.fname||'?')[0]+(u.lname||'')[0]||'').toUpperCase();
+    const avatar = u.picture
+      ? `<img class="user-table-avatar" src="${u.picture}" alt="" referrerpolicy="no-referrer">`
+      : `<span class="user-table-avatar-initials">${initials}</span>`;
+    const providerBadge = u.provider === 'google'
+      ? `<span class="user-provider-badge google">Google</span>`
+      : `<span class="user-provider-badge email">Email</span>`;
+    const joined = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+    return `<tr>
+      <td><span class="user-table-name">${avatar}<span>${u.fname||''} ${u.lname||''}</span></span></td>
+      <td style="color:var(--text-mid)">${u.email||'—'}</td>
+      <td>${providerBadge}</td>
+      <td style="color:var(--text-dim);font-size:.8rem">${joined}</td>
+      <td><button class="btn-delete-user" onclick="deleteUser('${u.id}')">Remove</button></td>
+    </tr>`;
+  }).join('');
+  wrap.innerHTML = `<table class="admin-users-table">
+    <thead><tr>
+      <th>User</th><th>Email</th><th>Provider</th><th>Joined</th><th></th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+async function deleteUser(id) {
+  if (!confirm('Remove this user from the database?')) return;
+  users = users.filter(u => u.id !== id);
+  await saveUsers();
+  updateAdminStats();
+  renderUsersTable();
+  showToast('User removed.', 'success');
+}
+
+
+// ──────────────────────────────────────────
+// ANALYTICS
+// ──────────────────────────────────────────
+const CAT_COLORS = {
+  nature:  '#4CAF82', abstract: '#9B6BFF', minimal: '#60C8FF',
+  space:   '#FF6B9B', city:     '#FFB347', other:   '#FFD700'
+};
+
+function sinceTs(days) { return Date.now() - days * 86400000; }
+
+function filterLog(log, days) {
+  const since = sinceTs(days);
+  return log.filter(e => e.ts >= since);
+}
+
+// ── CATEGORY BAR CHART ──
+async function renderCatBars(days) {
+  const log = await loadDownloads();
+  const filtered = filterLog(log, days);
+  const el = document.getElementById('cat-download-bars');
+
+  if (!filtered.length) {
+    el.innerHTML = `<div class="no-data"><div class="no-data-icon">📭</div>No downloads in this period yet.<br><small>Downloads are tracked automatically when users click the download button.</small></div>`;
+    return;
+  }
+
+  const counts = {};
+  filtered.forEach(e => { counts[e.cat] = (counts[e.cat]||0)+1; });
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const max = sorted[0][1];
+
+  el.innerHTML = sorted.map(([cat, count]) => {
+    const pct = Math.round((count/max)*100);
+    const color = CAT_COLORS[cat] || '#FFD700';
+    return `<div class="cat-bar-row">
+      <div class="cat-bar-label">${cat.charAt(0).toUpperCase()+cat.slice(1)}</div>
+      <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${pct}%;background:${color};"></div></div>
+      <div class="cat-bar-count">${count}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── TOP WALLS TABLE ──
+async function renderTopWalls(days) {
+  const log = await loadDownloads();
+  const filtered = filterLog(log, days);
+  const wrap = document.getElementById('top-walls-wrap');
+
+  if (!filtered.length) {
+    wrap.innerHTML = `<div class="no-data"><div class="no-data-icon">🏆</div>No downloads recorded yet in this period.</div>`;
+    return;
+  }
+
+  const counts = {};
+  const meta = {};
+  filtered.forEach(e => {
+    counts[e.wallId] = (counts[e.wallId]||0)+1;
+    meta[e.wallId] = {title: e.title, cat: e.cat};
+  });
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,10);
+
+  const rows = sorted.map(([wid, count], i) => {
+    const wall = wallpapers.find(w=>w.id===wid);
+    const info = meta[wid];
+    const rank = i+1;
+    const rankClass = rank<=3 ? `rank-${rank}` : 'rank-other';
+    const thumb = wall ? `<img class="top-wall-thumb" src="${wall.thumb||wall.src}" alt="">` : `<div style="width:44px;height:28px;border-radius:6px;background:rgba(255,255,255,.06);"></div>`;
+    const color = CAT_COLORS[info.cat]||'#FFD700';
+    return `<tr>
+      <td><span class="rank-badge ${rankClass}">${rank}</span></td>
+      <td>${thumb}</td>
+      <td style="color:#fff;font-weight:500">${info.title||wid}</td>
+      <td><span style="font-size:.68rem;font-weight:700;color:${color};background:${color}22;padding:2px 8px;border-radius:10px;">${(info.cat||'other').charAt(0).toUpperCase()+(info.cat||'other').slice(1)}</span></td>
+      <td style="color:var(--gold);font-weight:700;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;">${count}</td>
+    </tr>`;
+  }).join('');
+
+  wrap.innerHTML = `<table class="top-walls-table">
+    <thead><tr><th>#</th><th>Preview</th><th>Title</th><th>Category</th><th>Downloads</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+// ── SPARKLINE (last 14 days) ──
+async function renderSparkline() {
+  const log = await loadDownloads();
+  const bars = document.getElementById('dl-sparkline');
+  const labels = document.getElementById('spark-labels');
+  const days = 14;
+  const buckets = Array.from({length:days}, (_,i) => {
+    const d = new Date(); d.setDate(d.getDate()-(days-1-i));
+    return { date: d, count: 0, label: d.getDate()+'/'+(d.getMonth()+1) };
+  });
+  log.forEach(e => {
+    const d = new Date(e.ts);
+    const idx = buckets.findIndex(b =>
+      b.date.getDate()===d.getDate() && b.date.getMonth()===d.getMonth() && b.date.getFullYear()===d.getFullYear()
+    );
+    if (idx>-1) buckets[idx].count++;
+  });
+  const max = Math.max(...buckets.map(b=>b.count), 1);
+  bars.innerHTML = buckets.map((b,i) => {
+    const h = Math.max(4, Math.round((b.count/max)*100));
+    return `<div class="spark-bar" style="height:${h}%" title="${b.label}: ${b.count} downloads"></div>`;
+  }).join('');
+  // show only 1st, mid, last labels
+  labels.innerHTML = buckets.map((b,i) =>
+    (i===0||i===6||i===13) ? `<span>${b.label}</span>` : `<span></span>`
+  ).join('');
+}
+
+// ── INSIGHT CARDS ──
+async function renderInsightCards() {
+  const log = await loadDownloads();
+  const now = Date.now();
+  const today    = log.filter(e=>e.ts>=sinceTs(1)).length;
+  const week     = log.filter(e=>e.ts>=sinceTs(7)).length;
+  const month    = log.filter(e=>e.ts>=sinceTs(30)).length;
+  const total    = log.length;
+  const prevWeek = log.filter(e=>e.ts>=sinceTs(14)&&e.ts<sinceTs(7)).length;
+  const weekDelta = prevWeek===0 ? null : Math.round(((week-prevWeek)/prevWeek)*100);
+
+  const cats = {};
+  log.filter(e=>e.ts>=sinceTs(30)).forEach(e=>{ cats[e.cat]=(cats[e.cat]||0)+1; });
+  const topCat = Object.entries(cats).sort((a,b)=>b[1]-a[1])[0];
+
+  const avgPerDay = week>0 ? (week/7).toFixed(1) : '0';
+
+  const deltaHtml = (d) => {
+    if (d===null) return `<div class="insight-delta neutral">— no prior data</div>`;
+    if (d>0) return `<div class="insight-delta up">▲ ${d}% vs last week</div>`;
+    if (d<0) return `<div class="insight-delta down">▼ ${Math.abs(d)}% vs last week</div>`;
+    return `<div class="insight-delta neutral">= same as last week</div>`;
+  };
+
+  document.getElementById('insight-grid').innerHTML = `
+    <div class="insight-card"><div class="insight-icon">☀️</div><div class="insight-value">${today}</div><div class="insight-label">Today's Downloads</div></div>
+    <div class="insight-card"><div class="insight-icon">📅</div><div class="insight-value">${week}</div><div class="insight-label">This Week</div>${deltaHtml(weekDelta)}</div>
+    <div class="insight-card"><div class="insight-icon">🗓️</div><div class="insight-value">${month}</div><div class="insight-label">This Month</div></div>
+    <div class="insight-card"><div class="insight-icon">📦</div><div class="insight-value">${total}</div><div class="insight-label">All-Time Downloads</div></div>
+    <div class="insight-card"><div class="insight-icon">⚡</div><div class="insight-value">${avgPerDay}</div><div class="insight-label">Avg / Day (7d)</div></div>
+    <div class="insight-card"><div class="insight-icon">🔥</div><div class="insight-value">${topCat ? topCat[0].charAt(0).toUpperCase()+topCat[0].slice(1) : '—'}</div><div class="insight-label">Top Category (30d)</div></div>
+    <div class="insight-card"><div class="insight-icon">👥</div><div class="insight-value">${users.length}</div><div class="insight-label">Registered Users</div></div>
+    <div class="insight-card"><div class="insight-icon">🖼️</div><div class="insight-value">${wallpapers.length}</div><div class="insight-label">Total Wallpapers</div></div>
+  `;
+}
+
+// ── ACTIVITY FEED ──
+async function renderActivityFeed() {
+  const log = await loadActivity();
+  const el = document.getElementById('activity-feed');
+  const recent = [...log].reverse().slice(0,30);
+  if (!recent.length) {
+    el.innerHTML = `<div class="no-data" style="padding:16px;">No activity yet.</div>`;
+    return;
+  }
+  const typeIcon = {dl:'📥', signup:'👤', upload:'☁️'};
+  const typeLabel = {dl:'Downloaded', signup:'Signed up', upload:'Uploaded'};
+  const dotClass = {dl:'dl', signup:'signup', upload:'upload'};
+  el.innerHTML = recent.map(a => {
+    const ago = timeAgo(a.ts);
+    return `<div class="activity-item">
+      <div class="activity-dot ${dotClass[a.type]||'dl'}"></div>
+      <span>${typeIcon[a.type]||'•'} <strong>${typeLabel[a.type]||a.type}</strong>: ${a.label}</span>
+      <span class="activity-time">${ago}</span>
+    </div>`;
+  }).join('');
+}
+
+function timeAgo(ts) {
+  const s = Math.floor((Date.now()-ts)/1000);
+  if (s<60) return s+'s ago';
+  if (s<3600) return Math.floor(s/60)+'m ago';
+  if (s<86400) return Math.floor(s/3600)+'h ago';
+  return Math.floor(s/86400)+'d ago';
+}
+
+// ── WIRE TIME FILTER BUTTONS ──
+function wireTimeFilter(containerId, renderFn) {
+  document.getElementById(containerId).querySelectorAll('.tf-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById(containerId).querySelectorAll('.tf-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      renderFn(parseInt(btn.dataset.days));
+    });
+  });
+}
+
+// ── LOAD ALL ANALYTICS ──
+async function loadAnalytics() {
+  await renderInsightCards();
+  await renderCatBars(180);
+  await renderTopWalls(180);
+  await renderSparkline();
+  await renderActivityFeed();
+  wireTimeFilter('cat-tf', renderCatBars);
+  wireTimeFilter('top-tf', renderTopWalls);
+}
+
+// ──────────────────────────────────────────
+// TOAST
+// ──────────────────────────────────────────
+let _tt;
+function showToast(msg,type='success') {
+  document.querySelector('.toast')?.remove(); clearTimeout(_tt);
+  const t=document.createElement('div');
+  t.className=`toast ${type}`;
+  t.innerHTML=`<span>${type==='success'?'✓':'⚠'}</span> ${msg}`;
+  document.body.appendChild(t);
+  _tt=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(8px)';t.style.transition='opacity .3s,transform .3s';setTimeout(()=>t.remove(),300);},3200);
+}
+
+// ──────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────
+// ──────────────────────────────────────────
+// GITHUB LIVE CONFIG (admin panel helpers)
+// ──────────────────────────────────────────
+// These allow setting GitHub credentials at runtime without editing source code.
+// Values set here override the constants at the top of the file for this session.
+let _ghTokenOverride = '';
+let _ghUserOverride  = '';
+let _ghRepoOverride  = '';
+let _ghBranchOverride= '';
+
+// githubEnabled now considers runtime overrides set via admin panel
+// NOTE: The original function definition earlier in the file is superseded by this one.
+// JavaScript function declarations are hoisted but re-declaration with the same name
+// inside the same scope keeps only the last definition at runtime.
+function githubEnabled() {
+  return (_ghTokenOverride || GITHUB_TOKEN).length > 0 &&
+         (_ghUserOverride  || GITHUB_USER).length > 0 &&
+         (_ghRepoOverride  || GITHUB_REPO).length > 0;
+}
+
+// Override uploadToGitHub to use runtime values when set
+async function uploadToGitHub(file) {
+  const token  = _ghTokenOverride  || GITHUB_TOKEN;
+  const user   = _ghUserOverride   || GITHUB_USER;
+  const repo   = _ghRepoOverride   || GITHUB_REPO;
+  const branch = _ghBranchOverride || GITHUB_BRANCH;
+  const folder = GITHUB_FOLDER;
+
+  if (!token || !user || !repo) throw new Error('GitHub not configured');
+
+  const ext  = file.name.split('.').pop().toLowerCase() || 'jpg';
+  const name = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const path = `${folder}/${name}`;
+  const apiUrl = `https://api.github.com/repos/${user}/${repo}/contents/${path}`;
+
+  const base64 = await new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload  = () => res(r.result.split(',')[1]);
+    r.onerror = () => rej(new Error('FileReader failed'));
+    r.readAsDataURL(file);
+  });
+
+  const resp = await fetch(apiUrl, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+    },
+    body: JSON.stringify({ message: `Upload wallpaper: ${name}`, branch, content: base64 }),
+  });
+
+  if (!resp.ok) {
+    const msg = await resp.text().catch(() => '');
+    throw new Error(`GitHub API ${resp.status}: ${msg}`);
+  }
+
+  return `https://cdn.jsdelivr.net/gh/${user}/${repo}@${branch}/${path}`;
+}
+
+// Also override deleteFromGitHub to use runtime values
+async function deleteFromGitHub(cdnUrl) {
+  const token  = _ghTokenOverride  || GITHUB_TOKEN;
+  const user   = _ghUserOverride   || GITHUB_USER;
+  const repo   = _ghRepoOverride   || GITHUB_REPO;
+  const branch = _ghBranchOverride || GITHUB_BRANCH;
+  if (!token || !user || !repo || !cdnUrl) return;
+  try {
+    const prefix = `https://cdn.jsdelivr.net/gh/${user}/${repo}@${branch}/`;
+    if (!cdnUrl.startsWith(prefix)) return;
+    const filePath = cdnUrl.slice(prefix.length);
+    const apiUrl = `https://api.github.com/repos/${user}/${repo}/contents/${filePath}`;
+    const headers = {
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+    };
+    const info = await fetch(apiUrl, { headers });
+    if (!info.ok) return;
+    const { sha } = await info.json();
+    await fetch(apiUrl, {
+      method: 'DELETE',
+      headers: { ...headers, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: `Delete wallpaper: ${filePath}`, sha, branch }),
+    });
+  } catch(e) { console.warn('GitHub delete failed', e); }
+}
+
+function liveUpdateGHConfig() {
+  const t = document.getElementById('gh-token-input')?.value.trim();
+  const u = document.getElementById('gh-user-input')?.value.trim();
+  const r = document.getElementById('gh-repo-input')?.value.trim();
+  const b = document.getElementById('gh-branch-input')?.value.trim() || 'main';
+  const ok = t && u && r;
+  const badge = document.getElementById('gh-setup-status');
+  if (badge) {
+    badge.textContent = ok ? '✓ Ready to Apply' : '⚠ Not Configured';
+    badge.style.background = ok ? 'rgba(60,200,100,.1)' : 'rgba(255,100,100,.1)';
+    badge.style.borderColor = ok ? 'rgba(60,200,100,.3)' : 'rgba(255,100,100,.25)';
+    badge.style.color = ok ? 'rgba(80,220,120,1)' : 'rgba(255,130,130,1)';
+  }
+}
+
+async function applyGHConfig() {
+  const t = document.getElementById('gh-token-input')?.value.trim();
+  const u = document.getElementById('gh-user-input')?.value.trim();
+  const r = document.getElementById('gh-repo-input')?.value.trim();
+  const b = document.getElementById('gh-branch-input')?.value.trim() || 'main';
+  if (!t || !u || !r) { showToast('Fill in Token, Username and Repo.','error'); return; }
+  _ghTokenOverride  = t;
+  _ghUserOverride   = u;
+  _ghRepoOverride   = r;
+  _ghBranchOverride = b;
+  // Save permanently to localStorage (persists across sessions until explicitly removed)
+  try {
+    localStorage.setItem('walldrop-gh-config', JSON.stringify({token:t, user:u, repo:r, branch:b}));
+  } catch(e) { console.warn('Could not persist GitHub config', e); }
+  showR2Status();
+  const badge = document.getElementById('gh-setup-status');
+  if (badge) {
+    badge.textContent = '🐙 GitHub Active';
+    badge.style.background = 'rgba(60,200,100,.15)';
+    badge.style.borderColor = 'rgba(60,200,100,.4)';
+    badge.style.color = 'rgba(80,220,120,1)';
+  }
+  showToast('✓ GitHub config saved permanently! 🚀','success');
+}
+
+async function clearGHConfig() {
+  if (!confirm('Remove saved GitHub credentials?')) return;
+  _ghTokenOverride = _ghUserOverride = _ghRepoOverride = _ghBranchOverride = '';
+  try { localStorage.removeItem('walldrop-gh-config'); } catch(e){}
+  document.getElementById('gh-token-input').value = '';
+  document.getElementById('gh-user-input').value  = '';
+  document.getElementById('gh-repo-input').value  = '';
+  document.getElementById('gh-branch-input').value= 'main';
+  const badge = document.getElementById('gh-setup-status');
+  if (badge) {
+    badge.textContent = '⚠ Not Configured';
+    badge.style.background = 'rgba(255,100,100,.1)';
+    badge.style.borderColor = 'rgba(255,100,100,.25)';
+    badge.style.color = 'rgba(255,130,130,1)';
+  }
+  showR2Status();
+  showToast('GitHub credentials removed.','success');
+}
+
+async function loadGHConfig() {
+  try {
+    const raw = localStorage.getItem('walldrop-gh-config');
+    if (!raw) return;
+    const cfg = JSON.parse(raw);
+    if (!cfg.token || !cfg.user || !cfg.repo) return;
+    _ghTokenOverride  = cfg.token;
+    _ghUserOverride   = cfg.user;
+    _ghRepoOverride   = cfg.repo;
+    _ghBranchOverride = cfg.branch || 'main';
+    // Populate fields
+    const ti = document.getElementById('gh-token-input');
+    const ui = document.getElementById('gh-user-input');
+    const ri = document.getElementById('gh-repo-input');
+    const bi = document.getElementById('gh-branch-input');
+    if (ti) ti.value = cfg.token;
+    if (ui) ui.value = cfg.user;
+    if (ri) ri.value = cfg.repo;
+    if (bi) bi.value = cfg.branch || 'main';
+    const badge = document.getElementById('gh-setup-status');
+    if (badge) {
+      badge.textContent = '🐙 GitHub Active';
+      badge.style.background = 'rgba(60,200,100,.15)';
+      badge.style.borderColor = 'rgba(60,200,100,.4)';
+      badge.style.color = 'rgba(80,220,120,1)';
+    }
+    showR2Status();
+  } catch(e) { console.warn('Could not load GitHub config', e); }
+}
+
+async function testGHConfig() {
+  const t = _ghTokenOverride || document.getElementById('gh-token-input')?.value.trim() || GITHUB_TOKEN;
+  const u = _ghUserOverride  || document.getElementById('gh-user-input')?.value.trim()  || GITHUB_USER;
+  const r = _ghRepoOverride  || document.getElementById('gh-repo-input')?.value.trim()  || GITHUB_REPO;
+  const result = document.getElementById('gh-test-result');
+  if (!t || !u || !r) { showToast('Fill in your GitHub credentials first.','error'); return; }
+  result.style.display = 'block';
+  result.textContent = '🔍 Testing connection…';
+  result.style.background = 'rgba(255,255,255,.04)';
+  result.style.color = 'rgba(255,255,255,.6)';
+  result.style.border = '1px solid rgba(255,255,255,.08)';
+  try {
+    const resp = await fetch(`https://api.github.com/repos/${u}/${r}`, {
+      headers: { 'Authorization': `Bearer ${t}`, 'Accept': 'application/vnd.github+json' }
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      result.innerHTML = `✅ <strong style="color:rgba(60,220,100,1)">Connected!</strong> Repo: <strong>${data.full_name}</strong> | Visibility: ${data.private ? '🔒 Private (make it Public!)' : '🌐 Public ✓'} | Default branch: ${data.default_branch}`;
+      result.style.background = 'rgba(60,200,100,.07)';
+      result.style.color = 'rgba(200,255,210,1)';
+      result.style.border = '1px solid rgba(60,200,100,.25)';
+      if (data.private) showToast('⚠ Repo is Private — make it Public for jsDelivr CDN to work!','error');
+      else showToast('✓ GitHub connection successful!','success');
+    } else {
+      const err = await resp.json().catch(()=>({message: resp.status}));
+      result.innerHTML = `❌ <strong style="color:rgba(255,120,120,1)">Failed</strong>: ${err.message || resp.status} — Check your token and repo name.`;
+      result.style.background = 'rgba(255,80,80,.07)';
+      result.style.color = 'rgba(255,180,180,1)';
+      result.style.border = '1px solid rgba(255,80,80,.2)';
+    }
+  } catch(e) {
+    result.innerHTML = `❌ Network error: ${e.message}`;
+    result.style.background = 'rgba(255,80,80,.07)';
+    result.style.color = 'rgba(255,180,180,1)';
+    result.style.border = '1px solid rgba(255,80,80,.2)';
+  }
+}
+
+
+// ══════════════════════════════════════════════════════════════
+// GITHUB DATABASE — Persistent cloud storage for walldrop-db.json
+// Saves wallpapers[] + users[] so data survives server changes.
+// ══════════════════════════════════════════════════════════════
+
+let _ghDbToken  = '';
+let _ghDbUser   = '';
+let _ghDbRepo   = '';
+let _ghDbBranch = 'main';
+const GH_DB_FILE = 'walldrop-db.json';
+const GH_DB_LS_KEY = 'walldrop-gh-db-config';
+
+function ghDbEnabled() {
+  // Token is only needed for writes (push). For public repos, user+repo is enough to read.
+  return _ghDbUser.length > 0 && _ghDbRepo.length > 0;
+}
+
+function ghDbWriteEnabled() {
+  return _ghDbToken.length > 0 && _ghDbUser.length > 0 && _ghDbRepo.length > 0;
+}
+
+function setGHDbStatusBadge(active) {
+  const b = document.getElementById('gh-db-status');
+  if (!b) return;
+  if (active) {
+    b.textContent = '🗄 DB Active';
+    b.style.background = 'rgba(60,200,100,.15)';
+    b.style.borderColor = 'rgba(60,200,100,.4)';
+    b.style.color = 'rgba(80,220,120,1)';
+  } else {
+    b.textContent = '⚠ Not Configured';
+    b.style.background = 'rgba(255,100,100,.1)';
+    b.style.borderColor = 'rgba(255,100,100,.25)';
+    b.style.color = 'rgba(255,130,130,1)';
+  }
+}
+
+function showGHDbResult(msg, ok) {
+  const el = document.getElementById('gh-db-result');
+  if (!el) return;
+  el.style.display = 'block';
+  el.innerHTML = msg;
+  el.style.background = ok ? 'rgba(60,200,100,.07)' : 'rgba(255,80,80,.07)';
+  el.style.color = ok ? 'rgba(200,255,210,1)' : 'rgba(255,180,180,1)';
+  el.style.border = ok ? '1px solid rgba(60,200,100,.25)' : '1px solid rgba(255,80,80,.2)';
+}
+
+// ── Apply a parsed config object to in-memory vars + UI fields ──
+function _applyGHCfg(cfg) {
+  // token is optional for public repos (reads don't need auth)
+  if (!cfg.user || !cfg.repo) return false;
+  _ghDbToken  = cfg.token  || '';
+  _ghDbUser   = cfg.user;
+  _ghDbRepo   = cfg.repo;
+  _ghDbBranch = cfg.branch || 'main';
+  const ti = document.getElementById('gh-db-token-input');
+  const ui = document.getElementById('gh-db-user-input');
+  const ri = document.getElementById('gh-db-repo-input');
+  const bi = document.getElementById('gh-db-branch-input');
+  if (ti) ti.value = cfg.token;
+  if (ui) ui.value = cfg.user;
+  if (ri) ri.value = cfg.repo;
+  if (bi) bi.value = cfg.branch || 'main';
+  setGHDbStatusBadge(true);
+  return true;
+}
+
+// ── Load DB config: walldrop-config.json (shared file) then localStorage fallback ──
+let _ghDbLoadedFromFile = false;
+async function loadGHDbConfig() {
+  // 1. Try walldrop-config.json next to index.html (shared across ALL devices)
+  const configUrl = new URL('walldrop-config.json', window.location.href).href;
+  try {
+    const r = await fetch(configUrl + '?cb=' + Date.now());
+    if (!r.ok) throw new Error('no file');
+    const cfg = await r.json();
+    if (_applyGHCfg(cfg)) {
+      try { localStorage.setItem(GH_DB_LS_KEY, JSON.stringify(cfg)); } catch(e) {}
+      console.log('[WallDrop] Loaded credentials from walldrop-config.json');
+    }
+  } catch(_) {
+    // 2. Fallback: localStorage (this device only)
+    try {
+      const raw = localStorage.getItem(GH_DB_LS_KEY);
+      if (!raw) return;
+      _applyGHCfg(JSON.parse(raw));
+    } catch(e) { console.warn('Could not load GH DB config', e); }
+  }
+}
+
+function liveUpdateGHDbConfig() {
+  const t = document.getElementById('gh-db-token-input')?.value.trim();
+  const u = document.getElementById('gh-db-user-input')?.value.trim();
+  const r = document.getElementById('gh-db-repo-input')?.value.trim();
+  const ok = t && u && r;
+  setGHDbStatusBadge(ok);
+}
+
+function applyGHDbConfig() {
+  const t = document.getElementById('gh-db-token-input')?.value.trim();
+  const u = document.getElementById('gh-db-user-input')?.value.trim();
+  const r = document.getElementById('gh-db-repo-input')?.value.trim();
+  const b = document.getElementById('gh-db-branch-input')?.value.trim() || 'main';
+  if (!t || !u || !r) { showToast('Fill in DB Token, Username and Repo.', 'error'); return; }
+  _ghDbToken = t; _ghDbUser = u; _ghDbRepo = r; _ghDbBranch = b;
+  const cfg = {token:t, user:u, repo:r, branch:b};
+  try { localStorage.setItem(GH_DB_LS_KEY, JSON.stringify(cfg)); } catch(e) {}
+  setGHDbStatusBadge(true);
+  // Download walldrop-config.json for the user to place next to index.html
+  const json = JSON.stringify(cfg, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const blobUrl = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = blobUrl; a.download = 'walldrop-config.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(blobUrl), 5000);
+  showGHDbResult('<strong style="color:rgba(60,220,100,1)">Credentials saved!</strong><br>'
+    + '<strong>walldrop-config.json downloaded</strong> — place it in the same folder as index.html.<br>'
+    + 'Every device opening index.html from that folder will auto-load these credentials. No re-entering needed!', true);
+  showToast('Config saved + walldrop-config.json downloaded!', 'success');
+  pushDBToGitHub(true);
+}
+
+function clearGHDbConfig() {
+  if (!confirm('Remove GitHub DB credentials?')) return;
+  _ghDbToken = _ghDbUser = _ghDbRepo = _ghDbBranch = '';
+  try { localStorage.removeItem(GH_DB_LS_KEY); } catch(e) {}
+  ['gh-db-token-input','gh-db-user-input','gh-db-repo-input'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  const bi = document.getElementById('gh-db-branch-input'); if (bi) bi.value = 'main';
+  setGHDbStatusBadge(false);
+  showToast('GitHub DB credentials removed.', 'success');
+}
+
+// ── Get current SHA of the DB file (needed for updates) ──
+async function getGHDbFileSHA() {
+  try {
+    const resp = await fetch(
+      `https://api.github.com/repos/${_ghDbUser}/${_ghDbRepo}/contents/${GH_DB_FILE}?ref=${_ghDbBranch}`,
+      { headers: { 'Authorization': `Bearer ${_ghDbToken}`, 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' } }
+    );
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return data.sha || null;
+  } catch(e) { return null; }
+}
+
+// ── Push walldrop-db.json to GitHub ──
+async function pushDBToGitHub(showFeedback = false) {
+  if (!ghDbWriteEnabled()) return;
+  try {
+    const db = {
+      version: 2,
+      updatedAt: new Date().toISOString(),
+      wallpapers: wallpapers,
+      users: users.map(u => ({ ...u, passwordHash: u.passwordHash })) // keep hashed, never plaintext
+    };
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(db, null, 2))));
+    const sha = await getGHDbFileSHA();
+    const body = {
+      message: `WallDrop DB update — ${new Date().toLocaleString()}`,
+      branch: _ghDbBranch,
+      content,
+      ...(sha ? { sha } : {})
+    };
+    const resp = await fetch(
+      `https://api.github.com/repos/${_ghDbUser}/${_ghDbRepo}/contents/${GH_DB_FILE}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${_ghDbToken}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28'
+        },
+        body: JSON.stringify(body)
+      }
+    );
+    if (resp.ok) {
+      if (showFeedback) {
+        showGHDbResult(`✅ <strong style="color:rgba(60,220,100,1)">DB pushed!</strong> ${wallpapers.length} wallpapers · ${users.length} users → <code style="font-size:.75rem">github.com/${_ghDbUser}/${_ghDbRepo}/blob/${_ghDbBranch}/${GH_DB_FILE}</code>`, true);
+        showToast('✓ Database pushed to GitHub!', 'success');
+      }
+    } else {
+      const err = await resp.json().catch(()=>({}));
+      if (showFeedback) showGHDbResult(`❌ Push failed: ${err.message || resp.status}`, false);
+    }
+  } catch(e) {
+    if (showFeedback) showGHDbResult(`❌ Network error: ${e.message}`, false);
+    console.warn('DB push failed', e);
+  }
+}
+
+// ── Pull walldrop-db.json from GitHub and restore data ──
+async function pullDBFromGitHub() {
+  if (!ghDbEnabled()) { showToast('Configure the DB repo (Username + Repo) first.', 'error'); return; }
+  showGHDbResult('⬇ Fetching database from GitHub…', true);
+  try {
+    // Use raw content API to avoid base64 decode issues with large JSON
+    const rawUrl = `https://raw.githubusercontent.com/${_ghDbUser}/${_ghDbRepo}/${_ghDbBranch}/${GH_DB_FILE}`;
+    const resp = await fetch(rawUrl + '?cb=' + Date.now()); // cache-bust
+    if (!resp.ok) { showGHDbResult(`❌ Could not fetch DB file (${resp.status}). Make sure the repo is public and the file exists.`, false); return; }
+    const db = await resp.json();
+    if (!db.wallpapers) { showGHDbResult('❌ Invalid DB file — missing wallpapers array.', false); return; }
+    wallpapers = db.wallpapers;
+    if (db.users) users = db.users;
+    // Persist locally as well
+    try {
+      localStorage.setItem(WALLS_KEY, JSON.stringify(wallpapers));
+      localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    } catch(e) {}
+    renderGallery(); renderManageGrid(); updateAdminStats(); renderUsersTable();
+    showGHDbResult(`✅ <strong style="color:rgba(60,220,100,1)">Restored!</strong> ${wallpapers.length} wallpapers · ${users.length} users · Last saved: ${db.updatedAt ? new Date(db.updatedAt).toLocaleString() : 'unknown'}`, true);
+    showToast(`✓ Restored ${wallpapers.length} wallpapers from GitHub DB!`, 'success');
+  } catch(e) {
+    showGHDbResult(`❌ Error: ${e.message}`, false);
+    console.warn('DB pull failed', e);
+  }
+}
+
+loadData();
+</script>
+<!--
+════════════════════════════════════════════════════════════════════
+  CLOUDFLARE R2 SETUP — READ THIS BEFORE DEPLOYING
+════════════════════════════════════════════════════════════════════
+
+STEP 1 — Create an R2 Bucket
+  1. Go to https://dash.cloudflare.com → R2 Object Storage → Create bucket
+  2. Name it e.g. "walldrop-images"
+  3. Under Settings → Public Access → Enable "R2.dev subdomain"
+     Copy the public URL like: https://pub-abcd1234.r2.dev
+  4. Set R2_BUCKET_PUBLIC_URL in the CONFIG section above.
+
+STEP 2 — Deploy this Cloudflare Worker (copy to workers.dev)
+  1. Go to https://dash.cloudflare.com → Workers & Pages → Create Worker
+  2. Paste the Worker code below, click Deploy.
+  3. In the Worker → Settings → Bindings → R2 Bucket:
+       Variable name: MY_BUCKET
+       R2 bucket: walldrop-images   (your bucket name)
+  4. Copy the worker URL (e.g. https://walldrop-r2.yourname.workers.dev)
+  5. Set R2_WORKER_URL in the CONFIG section above.
+
+OPTIONAL — Secure your Worker with a token
+  1. Add a Workers Secret: AUTH_TOKEN = some-random-secret-string
+  2. Set R2_USE_AUTH_TOKEN = 'some-random-secret-string' in CONFIG.
+
+──────────────────── WORKER CODE (copy this) ────────────────────
+
+export default {
+  async fetch(request, env) {
+    // CORS
+    const corsHeaders = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    };
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { headers: corsHeaders });
+    }
+
+    // Optional auth
+    const token = env.AUTH_TOKEN;
+    if (token) {
+      const auth = request.headers.get('Authorization') || '';
+      if (auth !== `Bearer ${token}`) {
+        return new Response('Unauthorized', { status: 401 });
+      }
+    }
+
+    const url = new URL(request.url);
+    // /upload/<key>  PUT
+    // /delete/<key>  DELETE
+    const [, action, ...rest] = url.pathname.split('/');
+    const key = decodeURIComponent(rest.join('/'));
+
+    if (!key) return new Response('Missing key', { status: 400 });
+
+    if (action === 'upload' && request.method === 'PUT') {
+      const body = await request.arrayBuffer();
+      const contentType = request.headers.get('Content-Type') || 'image/jpeg';
+      await env.MY_BUCKET.put(key, body, { httpMetadata: { contentType } });
+      return new Response(JSON.stringify({ ok: true, key }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (action === 'delete' && request.method === 'DELETE') {
+      await env.MY_BUCKET.delete(key);
+      return new Response(JSON.stringify({ ok: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    return new Response('Not found', { status: 404 });
+  },
+};
+
+──────────────────── END WORKER CODE ────────────────────
+
+HOW IT WORKS (end-to-end)
+  ┌─ Browser ─────────────────────────────────────────┐
+  │  Admin picks a file → handleFile() stores File    │
+  │  doFileUpload() → uploadToR2(file)                │
+  │    PUT https://walldrop-r2.workers.dev/upload/key │
+  │         ↓                                         │
+  │  Cloudflare Worker → env.MY_BUCKET.put(key, body) │
+  │         ↓                                         │
+  │  Returns public URL: https://pub-xxxx.r2.dev/key  │
+  │  URL stored in wallpapers[] & persisted to storage│
+  └───────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════
+-->
+</body>
+</html>
