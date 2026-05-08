@@ -83,6 +83,19 @@ GEMINI_API_KEY    = os.environ.get("GEMINI_API_KEY",    "")
 OPENROUTER_API_KEY= os.environ.get("OPENROUTER_API_KEY","")
 
 # ──────────────────────────────────────────────────────────────────────────────
+# Auto-pull DB from GitHub on first request after cold start
+# (covers gunicorn/uwsgi where __main__ is never executed)
+# ──────────────────────────────────────────────────────────────────────────────
+_startup_pull_done = False
+
+@app.before_request
+def startup_pull():
+    global _startup_pull_done
+    if not _startup_pull_done:
+        _startup_pull_done = True
+        pull_db_from_github()
+
+# ──────────────────────────────────────────────────────────────────────────────
 # Simple flat-file "database" (JSON on disk).
 # For production swap this out for SQLite / PostgreSQL.
 # ──────────────────────────────────────────────────────────────────────────────
@@ -99,6 +112,25 @@ DEFAULT_WALLS = [
     {"id":"d8","src":"https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=1400&q=85","thumb":"https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=800&q=80","cat":"space","tag":"Space","title":"Deep Space","isDefault":True},
     {"id":"d9","src":"https://images.unsplash.com/photo-1497366216548-37526070297c?w=1400&q=85","thumb":"https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80","cat":"city","tag":"City","title":"Architecture","isDefault":True},
 ]
+
+def pull_db_from_github():
+    """Pull walldrop-db.json from GitHub DB repo and save locally. Called on startup."""
+    if not gh_db_enabled():
+        return
+    try:
+        raw_url = f"https://raw.githubusercontent.com/{GH_DB_USER}/{GH_DB_REPO}/{GH_DB_BRANCH}/{GH_DB_FILE}"
+        resp = requests.get(raw_url, params={"cb": int(time.time())}, timeout=15)
+        if resp.ok:
+            remote_db = resp.json()
+            if remote_db.get("wallpapers"):
+                save_db(remote_db)
+                print(f"✅ DB pulled from GitHub: {len(remote_db['wallpapers'])} wallpapers, {len(remote_db.get('users', []))} users")
+            else:
+                print("⚠️  GitHub DB file exists but has no wallpapers — keeping local DB.")
+        else:
+            print(f"⚠️  Could not pull DB from GitHub ({resp.status_code}) — using local DB.")
+    except Exception as e:
+        print(f"⚠️  GitHub DB pull error: {e} — using local DB.")
 
 def load_db():
     if os.path.exists(DB_FILE):
@@ -390,7 +422,7 @@ def api_delete_r2():
     return jsonify({"ok": resp.ok})
 
 # ──────────────────────────────────────────────────────────────────────────────
-# GitHub DB (walldrop-db.json persistence) — FIXED SHA mismatch handling
+# GitHub DB (walldrop-db.json persistence)
 # ──────────────────────────────────────────────────────────────────────────────
 def gh_db_enabled():
     return bool(GH_DB_TOKEN and GH_DB_USER and GH_DB_REPO)
@@ -402,64 +434,27 @@ def gh_db_headers():
         "X-GitHub-Api-Version": "2022-11-28",
     }
 
-def gh_db_get_sha():
-    """Fetch the current SHA of walldrop-db.json from GitHub. Returns None if file doesn't exist."""
-    api_url = f"https://api.github.com/repos/{GH_DB_USER}/{GH_DB_REPO}/contents/{GH_DB_FILE}"
-    resp = requests.get(api_url, headers=gh_db_headers(), timeout=10)
-    if resp.ok:
-        return resp.json().get("sha")
-    return None
-
 @app.route("/api/github/push", methods=["POST"])
 @admin_required
 def api_github_push():
     if not gh_db_enabled():
         return jsonify({"error": "GitHub DB not configured"}), 503
-
     db = load_db()
     db["updatedAt"] = int(time.time() * 1000)
     content = base64.b64encode(json.dumps(db, indent=2).encode()).decode()
     api_url = f"https://api.github.com/repos/{GH_DB_USER}/{GH_DB_REPO}/contents/{GH_DB_FILE}"
-
-    last_error = "Unknown error"
-
-    for attempt in range(3):
-        # Always fetch a fresh SHA right before each push attempt
-        sha = gh_db_get_sha()
-
-        body = {
-            "message": "WallDrop DB update",
-            "branch": GH_DB_BRANCH,
-            "content": content,
-        }
-        if sha:
-            body["sha"] = sha
-
-        resp = requests.put(api_url, json=body, headers=gh_db_headers(), timeout=20)
-
-        if resp.ok:
-            return jsonify({
-                "ok": True,
-                "wallpapers": len(db["wallpapers"]),
-                "users": len(db["users"]),
-            })
-
-        try:
-            resp_json = resp.json()
-            last_error = resp_json.get("message", str(resp.status_code))
-        except Exception:
-            last_error = str(resp.status_code)
-
-        # 409 = SHA conflict — re-fetch SHA and retry
-        if resp.status_code == 409:
-            time.sleep(1)
-            continue
-
-        # Any other error — no point retrying
-        break
-
-    return jsonify({"error": f"Push failed: {last_error}"}), 502
-
+    # Get existing SHA if file exists
+    sha = None
+    existing = requests.get(api_url, headers=gh_db_headers(), timeout=10)
+    if existing.ok:
+        sha = existing.json().get("sha")
+    body = {"message": "WallDrop DB update", "branch": GH_DB_BRANCH, "content": content}
+    if sha:
+        body["sha"] = sha
+    resp = requests.put(api_url, json=body, headers=gh_db_headers(), timeout=20)
+    if resp.ok:
+        return jsonify({"ok": True, "wallpapers": len(db["wallpapers"]), "users": len(db["users"])})
+    return jsonify({"error": f"Push failed: {resp.status_code}"}), 502
 
 @app.route("/api/github/pull", methods=["GET"])
 @admin_required
@@ -581,4 +576,5 @@ if __name__ == "__main__":
     print(f"   GitHub user : {GITHUB_USER or '(not set)'}")
     print(f"   R2 Worker   : {R2_WORKER_URL or '(not set)'}")
     print(f"   DB file     : {DB_FILE}\n")
+    pull_db_from_github()
     app.run(debug=True, port=8080)
