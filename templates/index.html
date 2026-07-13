@@ -473,8 +473,20 @@ nav{
 .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:700;display:none;align-items:center;justify-content:center;flex-direction:column;gap:20px;}
 .lightbox.open{display:flex;animation:fadeIn .2s ease;}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
-.lightbox img{max-width:90vw;max-height:72vh;border-radius:10px;object-fit:contain;box-shadow:0 20px 80px rgba(0,0,0,.8);}
+.lb-frame{position:relative;width:min(1200px,90vw);height:min(72vh,760px);border-radius:14px;overflow:hidden;box-shadow:0 20px 80px rgba(0,0,0,.8);background:#050505;flex-shrink:0;}
+.lb-frame-bg{position:absolute;inset:-30px;background-size:cover;background-position:center;filter:blur(45px) brightness(.45) saturate(1.15);transform:scale(1.15);}
+.lightbox img{position:relative;z-index:1;display:block;width:100%;height:100%;object-fit:contain;border-radius:0;box-shadow:none;}
 .lightbox-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+.lb-topbar{position:absolute;top:0;left:0;right:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;background:linear-gradient(to bottom,rgba(0,0,0,.6),rgba(0,0,0,0));}
+.lb-publisher{display:flex;align-items:center;gap:9px;cursor:pointer;min-width:0;}
+.lb-publisher-avatar{width:30px;height:30px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:.82rem;color:#0a0a0a;overflow:hidden;}
+.lb-publisher-avatar img{width:100%;height:100%;object-fit:cover;}
+.lb-publisher-name{font-size:.85rem;font-weight:600;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .2s;}
+.lb-publisher:hover .lb-publisher-name{color:var(--accent);}
+.lb-follow-btn{flex-shrink:0;background:rgba(255,255,255,.12);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.32);color:#fff;padding:6px 16px;border-radius:100px;font-size:.78rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .2s,border-color .2s,color .2s;}
+.lb-follow-btn:hover{background:rgba(255,255,255,.24);}
+.lb-follow-btn.following{background:rgba(232,213,163,.18);border-color:rgba(232,213,163,.5);color:var(--accent);}
+.lb-follow-btn.following::before{content:'✓ ';}
 .lightbox-close{position:fixed;top:18px;right:22px;background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--text);font-size:1.3rem;cursor:pointer;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .2s;}
 .lightbox-close:hover{background:rgba(255,255,255,.14);}
 .lb-meta{text-align:center;}
@@ -492,8 +504,6 @@ nav{
 .lb-like:hover{background:rgba(255,80,80,.12);border-color:rgba(255,107,107,.35);}
 .lb-like.active{color:#ff6b6b;border-color:rgba(255,107,107,.4);background:rgba(255,80,80,.1);}
 .lb-like.active svg{fill:#ff6b6b;stroke:#ff6b6b;}
-.lb-by-wally{font-size:.78rem;color:var(--muted);margin-top:8px;cursor:pointer;transition:color .2s;}
-.lb-by-wally:hover{color:var(--accent);}
 /* ── WALLY PROFILE VIEW ── */
 .wally-header{max-width:1000px;margin:0 auto;padding:3rem 2.5rem 2rem;display:flex;align-items:center;gap:2.5rem;flex-wrap:wrap;}
 .wally-avatar{width:110px;height:110px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:2.6rem;color:#0a0a0a;}
@@ -507,10 +517,6 @@ nav{
 .wally-follow-btn.following:hover{border-color:rgba(255,80,80,.4);color:#ff6b6b;}
 .wally-follow-btn.following::before{content:'✓ ';}
 
-.lb-creator-follow-btn{background:transparent;border:1px solid var(--border);color:var(--text-mid);padding:5px 14px;border-radius:100px;font-size:.74rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:border-color .2s,color .2s,background .2s;}
-.lb-creator-follow-btn:hover{border-color:rgba(232,213,163,.35);color:var(--accent);}
-.lb-creator-follow-btn.following{background:rgba(232,213,163,.1);border-color:rgba(232,213,163,.35);color:var(--accent);}
-.lb-creator-follow-btn.following::before{content:'✓ ';}
 .wally-stats{display:flex;gap:1.8rem;margin-bottom:.8rem;font-size:.88rem;color:var(--text-mid);}
 .wally-stats b{color:var(--text);font-weight:700;}
 .wally-bio{font-size:.88rem;color:var(--text-dim);max-width:480px;}
@@ -649,13 +655,17 @@ footer .logo{font-size:1.2rem;}
   .toast{max-width:calc(100vw - 2rem);font-size:.82rem;padding:.55rem 1.1rem;}
 
   /* Lightbox */
-  .lightbox img{max-width:96vw;max-height:55vh;}
+  .lb-frame{width:96vw;height:52vh;border-radius:10px;}
   .lightbox-actions{gap:8px;}
   .lb-nav{width:38px;height:52px;font-size:1.5rem;}
   .lb-prev{left:6px;}
   .lb-next{right:6px;}
   .lb-meta{padding:0 .5rem;}
   .lb-title{font-size:1rem;}
+  .lb-topbar{padding:10px 12px;}
+  .lb-publisher-avatar{width:24px;height:24px;font-size:.7rem;}
+  .lb-publisher-name{font-size:.76rem;max-width:38vw;}
+  .lb-follow-btn{padding:5px 12px;font-size:.72rem;}
 
   /* Admin Users table */
   .admin-users-table{font-size:.78rem;}
@@ -1773,15 +1783,20 @@ footer .logo{font-size:1.2rem;}
   <button class="lightbox-close" onclick="closeLightbox()">×</button>
   <button class="lb-nav lb-prev" id="lb-prev" onclick="lbNav(-1)">&#8249;</button>
   <button class="lb-nav lb-next" id="lb-next" onclick="lbNav(1)">&#8250;</button>
-  <img id="lb-img" src="" alt="">
+  <div class="lb-frame">
+    <div class="lb-frame-bg" id="lb-frame-bg"></div>
+    <div class="lb-topbar">
+      <div class="lb-publisher" id="lb-publisher" onclick="lbGoToPublisher()">
+        <span class="lb-publisher-avatar" id="lb-publisher-avatar">W</span>
+        <span class="lb-publisher-name" id="lb-publisher-name">Wally</span>
+      </div>
+      <button class="lb-follow-btn" id="lb-follow-btn" onclick="lbToggleFollow()">Follow</button>
+    </div>
+    <img id="lb-img" src="" alt="">
+  </div>
   <div class="lb-meta">
     <div class="lb-title" id="lb-title"></div>
     <div class="lb-tag" id="lb-tag"></div>
-    <div class="lb-by-wally" id="lb-by-wally" onclick="closeLightbox();showWallyProfile();">Published by Wally</div>
-    <div id="lb-by-creator" style="display:none;align-items:center;gap:10px;margin:4px 0 8px;">
-      <span class="lb-by-wally" id="lb-creator-name" style="cursor:default;"></span>
-      <button class="lb-creator-follow-btn" id="lb-creator-follow-btn" onclick="toggleCreatorFollow()">Follow</button>
-    </div>
   </div>
   <div class="lightbox-actions">
     <button class="lb-like" id="lb-like" title="Favourite">
@@ -2665,6 +2680,10 @@ function openLightbox(id) {
   img.src = w.src;
   img.alt = w.title || w.tag || '';
 
+  // Blurred fill background so every aspect ratio sits nicely in the frame
+  const frameBg = document.getElementById('lb-frame-bg');
+  if (frameBg) frameBg.style.backgroundImage = `url("${w.src}")`;
+
   // Meta
   const titleEl = document.getElementById('lb-title');
   const tagEl   = document.getElementById('lb-tag');
@@ -2672,19 +2691,19 @@ function openLightbox(id) {
   if (tagEl)   tagEl.textContent   = w.cat ? w.cat.toUpperCase() : '';
 
   // Attribution — either the main Wally account, or the Wally creator who uploaded it
-  const byWallyEl    = document.getElementById('lb-by-wally');
-  const byCreatorWrap = document.getElementById('lb-by-creator');
+  const nameEl = document.getElementById('lb-publisher-name');
+  const avatarEl = document.getElementById('lb-publisher-avatar');
   _lbCreatorId = w.uploaderId || null;
   if (_lbCreatorId) {
-    if (byWallyEl) byWallyEl.style.display = 'none';
-    if (byCreatorWrap) byCreatorWrap.style.display = 'flex';
-    const nameEl = document.getElementById('lb-creator-name');
-    if (nameEl) nameEl.textContent = `Published by ${w.uploaderName || 'a Wally creator'}`;
-    loadCreatorFollowState(_lbCreatorId);
+    if (nameEl) nameEl.textContent = w.uploaderName || 'a Wally creator';
+    if (avatarEl) avatarEl.innerHTML = w.uploaderPicture
+      ? `<img src="${w.uploaderPicture}" alt="" referrerpolicy="no-referrer">`
+      : escapeHTML((w.uploaderName || 'W')[0].toUpperCase());
   } else {
-    if (byWallyEl) byWallyEl.style.display = '';
-    if (byCreatorWrap) byCreatorWrap.style.display = 'none';
+    if (nameEl) nameEl.textContent = 'Wally';
+    if (avatarEl) avatarEl.textContent = 'W';
   }
+  loadLbFollowState();
 
   // Download
   const lbDl = document.getElementById('lb-dl');
@@ -3138,29 +3157,49 @@ async function toggleFollowWally() {
 }
 
 // ──────────────────────────────────────────
-// PER-CREATOR ("WALLY") FOLLOW — from the lightbox attribution line
+// PUBLISHER ATTRIBUTION + FOLLOW — lightbox topbar
+// Works for both the main Wally account and individual Wally creators.
 // ──────────────────────────────────────────
 let _lbCreatorId = null;
 
-async function loadCreatorFollowState(creatorId) {
-  const btn = document.getElementById('lb-creator-follow-btn');
+function lbGoToPublisher() {
+  closeLightbox();
+  if (_lbCreatorId) showCreatorProfile(_lbCreatorId);
+  else showWallyProfile();
+}
+
+async function loadLbFollowState() {
+  const btn = document.getElementById('lb-follow-btn');
   if (!btn) return;
   if (!currentUser) { btn.style.display = ''; setFollowBtnState(btn, false); return; }
   try {
-    const resp = await fetch(`/api/creators/${encodeURIComponent(creatorId)}/profile`);
-    const data = await resp.json();
-    if (!resp.ok) { btn.style.display = 'none'; return; }
-    btn.style.display = '';
-    setFollowBtnState(btn, !!data.isFollowing);
+    if (_lbCreatorId) {
+      // Hide when viewing your own creator profile's wallpaper
+      if (currentUser.id === _lbCreatorId) { btn.style.display = 'none'; return; }
+      const resp = await fetch(`/api/creators/${encodeURIComponent(_lbCreatorId)}/profile`);
+      const data = await resp.json();
+      if (!resp.ok) { btn.style.display = 'none'; return; }
+      btn.style.display = '';
+      setFollowBtnState(btn, !!data.isFollowing);
+    } else {
+      const resp = await fetch('/api/wally');
+      const data = await resp.json();
+      if (!resp.ok) { btn.style.display = 'none'; return; }
+      if (data.isWally) { btn.style.display = 'none'; return; }
+      btn.style.display = '';
+      setFollowBtnState(btn, !!data.isFollowing);
+    }
   } catch(e) { btn.style.display = 'none'; }
 }
 
-async function toggleCreatorFollow() {
+async function lbToggleFollow() {
   if (!currentUser) { showSignIn(); return; }
-  if (!_lbCreatorId) return;
-  const btn = document.getElementById('lb-creator-follow-btn');
+  const btn = document.getElementById('lb-follow-btn');
   try {
-    const resp = await fetch(`/api/creators/${encodeURIComponent(_lbCreatorId)}/follow`, { method: 'POST' });
+    const url = _lbCreatorId
+      ? `/api/creators/${encodeURIComponent(_lbCreatorId)}/follow`
+      : '/api/wally/follow';
+    const resp = await fetch(url, { method: 'POST' });
     const data = await resp.json();
     if (resp.ok && data.ok) {
       setFollowBtnState(btn, data.following);
