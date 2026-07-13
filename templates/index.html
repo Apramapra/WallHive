@@ -485,8 +485,13 @@ nav{
 .lb-related-card{flex:0 0 80px;height:54px;border-radius:8px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:border-color .2s;opacity:.7;transition:opacity .2s;}
 .lb-related-card:hover{opacity:1;border-color:var(--accent);}
 .lb-related-card img{width:100%;height:100%;object-fit:cover;}
-.lb-share{background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--text);padding:8px 18px;border-radius:100px;font-size:.82rem;cursor:pointer;transition:background .2s;}
+.lb-share{background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--text);padding:8px 18px;border-radius:100px;font-size:.82rem;cursor:pointer;transition:background .2s;display:flex;align-items:center;gap:7px;}
 .lb-share:hover{background:rgba(255,255,255,.14);}
+.lb-like{background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--text);padding:8px 18px;border-radius:100px;font-size:.82rem;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .2s,border-color .2s,color .2s;display:flex;align-items:center;gap:7px;}
+.lb-like svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.7;transition:fill .2s,stroke .2s;}
+.lb-like:hover{background:rgba(255,80,80,.12);border-color:rgba(255,107,107,.35);}
+.lb-like.active{color:#ff6b6b;border-color:rgba(255,107,107,.4);background:rgba(255,80,80,.1);}
+.lb-like.active svg{fill:#ff6b6b;stroke:#ff6b6b;}
 .lb-by-wally{font-size:.78rem;color:var(--muted);margin-top:8px;cursor:pointer;transition:color .2s;}
 .lb-by-wally:hover{color:var(--accent);}
 /* ── WALLY PROFILE VIEW ── */
@@ -496,9 +501,16 @@ nav{
 .wally-name-row{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-bottom:.6rem;}
 .wally-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;color:var(--text);}
 .wally-badge{background:rgba(232,213,163,.1);border:1px solid rgba(232,213,163,.25);color:var(--accent);font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:20px;}
-.wally-follow-btn{background:var(--accent);color:#0a0a0a;border:none;padding:9px 22px;border-radius:100px;font-size:.85rem;font-weight:600;cursor:pointer;transition:opacity .2s;}
-.wally-follow-btn:hover{opacity:.85;}
-.wally-follow-btn.following{background:transparent;border:1px solid var(--border);color:var(--text);}
+.wally-follow-btn{background:var(--accent);color:#0a0a0a;border:1px solid var(--accent);padding:9px 24px;border-radius:100px;font-size:.85rem;font-weight:600;cursor:pointer;flex-shrink:0;transition:opacity .2s,background .2s,color .2s,border-color .2s;}
+.wally-follow-btn:hover{opacity:.9;}
+.wally-follow-btn.following{background:transparent;border:1px solid var(--border);color:var(--text-mid);}
+.wally-follow-btn.following:hover{border-color:rgba(255,80,80,.4);color:#ff6b6b;}
+.wally-follow-btn.following::before{content:'✓ ';}
+
+.lb-creator-follow-btn{background:transparent;border:1px solid var(--border);color:var(--text-mid);padding:5px 14px;border-radius:100px;font-size:.74rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:border-color .2s,color .2s,background .2s;}
+.lb-creator-follow-btn:hover{border-color:rgba(232,213,163,.35);color:var(--accent);}
+.lb-creator-follow-btn.following{background:rgba(232,213,163,.1);border-color:rgba(232,213,163,.35);color:var(--accent);}
+.lb-creator-follow-btn.following::before{content:'✓ ';}
 .wally-stats{display:flex;gap:1.8rem;margin-bottom:.8rem;font-size:.88rem;color:var(--text-mid);}
 .wally-stats b{color:var(--text);font-weight:700;}
 .wally-bio{font-size:.88rem;color:var(--text-dim);max-width:480px;}
@@ -516,24 +528,6 @@ nav{
   .wally-name{font-size:1.3rem;}
   .wally-grid-wrap{padding:0 1.2rem 60px;}
 }
-/* ── COMMENTS ── */
-.lb-comments{width:100%;max-width:560px;margin:6px auto 0;text-align:left;}
-.lb-comments-title{font-size:.8rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.6rem;}
-.lb-comments-list{max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;margin-bottom:.7rem;padding-right:4px;}
-.lb-comments-list::-webkit-scrollbar{width:4px;}
-.lb-comments-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px;}
-.lb-comment{display:flex;justify-content:space-between;gap:10px;font-size:.84rem;color:var(--text-mid);line-height:1.4;}
-.lb-comment b{color:var(--text);font-weight:600;}
-.lb-comment-del{color:var(--muted);cursor:pointer;font-size:.75rem;flex-shrink:0;background:none;border:none;}
-.lb-comment-del:hover{color:var(--red);}
-.lb-comments-empty{font-size:.82rem;color:var(--muted);padding:6px 0;}
-.lb-comment-form{display:flex;gap:8px;}
-.lb-comment-input{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:100px;padding:9px 16px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.84rem;outline:none;}
-.lb-comment-input:focus{border-color:rgba(232,213,163,.35);}
-.lb-comment-submit{background:var(--accent);color:#0a0a0a;border:none;padding:9px 18px;border-radius:100px;font-size:.82rem;font-weight:600;cursor:pointer;flex-shrink:0;}
-.lb-comment-submit:hover{opacity:.85;}
-.lb-comment-signin{font-size:.82rem;color:var(--muted);}
-.lb-comment-signin a{color:var(--accent);cursor:pointer;}
 /* ── SORT + RANDOM BAR ── */
 .gallery-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1.25rem;}
 .sort-select{background:var(--card);border:1px solid var(--border);color:var(--text);padding:.35rem .9rem;border-radius:100px;font-size:.8rem;font-family:'DM Sans',sans-serif;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237a7672' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .75rem center;padding-right:2rem;transition:border-color .2s;}
@@ -682,9 +676,10 @@ footer .logo{font-size:1.2rem;}
   .time-filter-bar::-webkit-scrollbar{display:none;}
   .tf-btn{flex-shrink:0;}
 
-  /* Lightbox share/download buttons */
+  /* Lightbox like/share/download buttons */
   .lightbox-actions .btn{padding:8px 14px;font-size:.8rem;}
-  .lb-share{padding:8px 14px;font-size:.8rem;}
+  .lb-share,.lb-like{padding:8px 14px;font-size:.8rem;}
+  .lb-like span{display:none;}
 }
 
 /* ── 380 → very small phone ── */
@@ -1785,18 +1780,16 @@ footer .logo{font-size:1.2rem;}
     <div class="lb-by-wally" id="lb-by-wally" onclick="closeLightbox();showWallyProfile();">Published by Wally</div>
     <div id="lb-by-creator" style="display:none;align-items:center;gap:10px;margin:4px 0 8px;">
       <span class="lb-by-wally" id="lb-creator-name" style="cursor:default;"></span>
-      <button class="btn btn-outline" id="lb-creator-follow-btn" style="padding:4px 12px;font-size:.72rem;" onclick="toggleCreatorFollow()">Follow</button>
+      <button class="lb-creator-follow-btn" id="lb-creator-follow-btn" onclick="toggleCreatorFollow()">Follow</button>
     </div>
   </div>
   <div class="lightbox-actions">
+    <button class="lb-like" id="lb-like" title="Favourite">
+      <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      <span>Like</span>
+    </button>
     <a id="lb-dl" href="#" class="btn btn-fill" style="text-decoration:none;padding:10px 24px;">↓ Download</a>
     <button class="lb-share" id="lb-share" onclick="shareWall()">⤴ Share</button>
-    <button class="btn btn-outline" onclick="closeLightbox()">Close</button>
-  </div>
-  <div class="lb-comments" id="lb-comments">
-    <div class="lb-comments-title">Comments</div>
-    <div class="lb-comments-list" id="lb-comments-list"></div>
-    <div id="lb-comment-form-wrap"></div>
   </div>
   <div class="lb-related" id="lb-related"></div>
 </div>
@@ -2702,6 +2695,14 @@ function openLightbox(id) {
     await triggerDownload(w.src, w.title || w.tag || 'wallpaper');
   };
 
+  // Like (favourite)
+  const lbLike = document.getElementById('lb-like');
+  if (lbLike) {
+    const isFav = !!(currentUser && currentUser.favs && currentUser.favs.includes(w.id));
+    lbLike.classList.toggle('active', isFav);
+    lbLike.onclick = () => toggleFav(w.id, lbLike);
+  }
+
   // Related wallpapers (same category, exclude self)
   const related = wallpapers.filter(x=>x.cat===w.cat && x.id!==id).slice(0,8);
   const relEl = document.getElementById('lb-related');
@@ -2714,8 +2715,6 @@ function openLightbox(id) {
   }
 
   document.getElementById('lightbox').classList.add('open');
-
-  loadComments(id);
 }
 
 function closeLightbox() {
@@ -3175,97 +3174,12 @@ async function toggleCreatorFollow() {
 }
 
 // ──────────────────────────────────────────
-// WALLPAPER COMMENTS
+// HTML escaping helper (still used by creator/admin panels)
 // ──────────────────────────────────────────
 function escapeHTML(s) {
   const d = document.createElement('div');
   d.textContent = s == null ? '' : String(s);
   return d.innerHTML;
-}
-
-async function loadComments(wallId) {
-  const listEl = document.getElementById('lb-comments-list');
-  const formWrap = document.getElementById('lb-comment-form-wrap');
-  if (!listEl || !formWrap) return;
-  listEl.innerHTML = '<div class="lb-comments-empty">Loading comments…</div>';
-
-  // Comment form / sign-in prompt
-  if (currentUser) {
-    formWrap.innerHTML = `
-      <div class="lb-comment-form">
-        <input class="lb-comment-input" id="lb-comment-input" type="text" maxlength="500" placeholder="Add a comment…" onkeydown="if(event.key==='Enter')submitComment('${wallId}')">
-        <button class="lb-comment-submit" onclick="submitComment('${wallId}')">Post</button>
-      </div>`;
-  } else {
-    formWrap.innerHTML = `<div class="lb-comment-signin"><a onclick="closeLightbox();showSignIn();">Sign in</a> to leave a comment.</div>`;
-  }
-
-  try {
-    const resp = await fetch(`/api/wallpapers/${encodeURIComponent(wallId)}/comments`);
-    const data = await resp.json();
-    if (!resp.ok) { listEl.innerHTML = '<div class="lb-comments-empty">Could not load comments.</div>'; return; }
-    renderComments(data.comments || []);
-  } catch(e) {
-    listEl.innerHTML = '<div class="lb-comments-empty">Could not load comments.</div>';
-  }
-}
-
-function renderComments(comments) {
-  const listEl = document.getElementById('lb-comments-list');
-  if (!listEl) return;
-  if (!comments.length) {
-    listEl.innerHTML = '<div class="lb-comments-empty">No comments yet — be the first!</div>';
-    return;
-  }
-  const myId = currentUser ? currentUser.id : null;
-  const canDeleteAny = !!(currentUser && currentUser.is_admin);
-  listEl.innerHTML = comments.map(c => `
-    <div class="lb-comment" data-id="${c.id}">
-      <span><b>${escapeHTML(c.userName)}</b> ${escapeHTML(c.text)}</span>
-      ${(canDeleteAny || c.userId === myId) ? `<button class="lb-comment-del" onclick="deleteComment('${c.id}','${_lbWallId}')">Delete</button>` : ''}
-    </div>
-  `).join('');
-}
-
-async function submitComment(wallId) {
-  const input = document.getElementById('lb-comment-input');
-  if (!input) return;
-  const text = input.value.trim();
-  if (!text) return;
-  input.disabled = true;
-  try {
-    const resp = await fetch(`/api/wallpapers/${encodeURIComponent(wallId)}/comments`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }),
-    });
-    const data = await resp.json();
-    if (resp.ok && data.ok) {
-      input.value = '';
-      await loadComments(wallId);
-    } else {
-      showToast(data.error || 'Could not post comment.', 'error');
-    }
-  } catch(e) {
-    showToast('Network error. Please try again.', 'error');
-  } finally {
-    input.disabled = false;
-    input.focus();
-  }
-}
-
-async function deleteComment(commentId, wallId) {
-  try {
-    const resp = await fetch(`/api/comments/${encodeURIComponent(commentId)}`, { method: 'DELETE' });
-    const data = await resp.json();
-    if (resp.ok && data.ok) {
-      await loadComments(wallId);
-    } else {
-      showToast(data.error || 'Could not delete comment.', 'error');
-    }
-  } catch(e) {
-    showToast('Network error. Please try again.', 'error');
-  }
 }
 
 // Convert jsDelivr CDN URL to raw.githubusercontent.com URL (has proper CORS headers)
