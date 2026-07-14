@@ -14,7 +14,9 @@ FIXES APPLIED vs original:
 Endpoints (unchanged from original)
 -------------------------------------
 POST /api/login
-POST /api/signup
+POST /api/signup/start          (send OTP to email)
+POST /api/signup/verify         (check OTP, create account)
+POST /api/signup/resend         (resend OTP)
 POST /api/logout
 GET  /api/me
 GET  /api/config
@@ -51,6 +53,16 @@ except ImportError:
         "FATAL: bcrypt is not installed.\n"
         "Run:  pip install bcrypt\n"
         "Passwords cannot be stored securely without it."
+    )
+
+# ── resend is now a hard requirement (email verification on signup) ─────────
+try:
+    import resend as _resend
+except ImportError:
+    raise SystemExit(
+        "FATAL: resend is not installed.\n"
+        "Run:  pip install resend\n"
+        "Email verification codes cannot be sent without it."
     )
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
@@ -154,6 +166,35 @@ R2_AUTH_TOKEN        = os.environ.get("R2_AUTH_TOKEN",        "")
 GEMINI_API_KEY     = os.environ.get("GEMINI_API_KEY",     "")
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
 
+# Resend — required for email signup verification codes
+RESEND_API_KEY = _require_env("RESEND_API_KEY")
+RESEND_FROM    = os.environ.get("RESEND_FROM", "WallHive <noreply@wallhive.app>")
+_resend.api_key = RESEND_API_KEY
+
+OTP_TTL_MS       = 15 * 60 * 1000   # 15 minutes
+OTP_MAX_ATTEMPTS = 5
+
+def send_verification_email(to_email, fname, code):
+    """Send a signup OTP via Resend. Returns (ok: bool, error: str|None)."""
+    try:
+        _resend.Emails.send({
+            "from": RESEND_FROM,
+            "to": [to_email],
+            "subject": f"Your WallHive verification code: {code}",
+            "html": f"""
+                <div style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1a1a1a;">
+                  <h2 style="margin:0 0 12px;">Hi {fname or 'there'},</h2>
+                  <p style="margin:0 0 20px;color:#444;">Use this code to finish creating your WallHive account:</p>
+                  <div style="font-size:32px;font-weight:700;letter-spacing:8px;background:#f4f4f4;padding:16px 20px;border-radius:10px;text-align:center;margin:0 0 20px;">{code}</div>
+                  <p style="margin:0 0 8px;color:#666;font-size:13px;">This code expires in 15 minutes.</p>
+                  <p style="margin:0;color:#999;font-size:12px;">If you didn't request this, you can safely ignore this email.</p>
+                </div>
+            """,
+        })
+        return True, None
+    except Exception as e:
+        return False, str(e)
+
 # ──────────────────────────────────────────────────────────────────────────────
 # SQLite database  (replaces the flat JSON file)
 #
@@ -231,6 +272,16 @@ def _init_db():
                     PRIMARY KEY (creator_id, follower_id)
                 );
                 CREATE INDEX IF NOT EXISTS idx_creator_followers_creator ON creator_followers(creator_id);
+                CREATE TABLE IF NOT EXISTS pending_signups (
+                    email         TEXT PRIMARY KEY,
+                    fname         TEXT,
+                    lname         TEXT,
+                    password_hash TEXT NOT NULL,
+                    otp_hash      TEXT NOT NULL,
+                    expires_at    INTEGER NOT NULL,
+                    attempts      INTEGER NOT NULL DEFAULT 0,
+                    created_at    INTEGER NOT NULL
+                );
             """)
             # Seed default wallpapers only once
             count = conn.execute("SELECT COUNT(*) FROM wallpapers WHERE is_default=1").fetchone()[0]
@@ -440,6 +491,51 @@ def db_create_user(uid, fname, lname, email, password_hash=None, provider="email
                 " VALUES(?,?,?,?,?,?,?,?,'[]')",
                 (uid, fname, lname, email.lower(), password_hash, provider, picture, now)
             )
+            conn.commit()
+        finally:
+            conn.close()
+
+def db_create_pending_signup(email, fname, lname, password_hash, otp_hash, expires_at):
+    """Insert/replace a pending signup (re-signing up before verifying overwrites the old code)."""
+    with _DB_LOCK:
+        conn = _get_conn()
+        try:
+            now = int(time.time() * 1000)
+            conn.execute(
+                """INSERT INTO pending_signups(email,fname,lname,password_hash,otp_hash,expires_at,attempts,created_at)
+                   VALUES(?,?,?,?,?,?,0,?)
+                   ON CONFLICT(email) DO UPDATE SET
+                     fname=excluded.fname, lname=excluded.lname,
+                     password_hash=excluded.password_hash, otp_hash=excluded.otp_hash,
+                     expires_at=excluded.expires_at, attempts=0, created_at=excluded.created_at""",
+                (email.lower(), fname, lname, password_hash, otp_hash, expires_at, now)
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
+def db_get_pending_signup(email):
+    with _DB_LOCK:
+        conn = _get_conn()
+        try:
+            return conn.execute("SELECT * FROM pending_signups WHERE email=?", (email.lower(),)).fetchone()
+        finally:
+            conn.close()
+
+def db_bump_pending_attempts(email):
+    with _DB_LOCK:
+        conn = _get_conn()
+        try:
+            conn.execute("UPDATE pending_signups SET attempts=attempts+1 WHERE email=?", (email.lower(),))
+            conn.commit()
+        finally:
+            conn.close()
+
+def db_delete_pending_signup(email):
+    with _DB_LOCK:
+        conn = _get_conn()
+        try:
+            conn.execute("DELETE FROM pending_signups WHERE email=?", (email.lower(),))
             conn.commit()
         finally:
             conn.close()
@@ -888,33 +984,112 @@ def api_login():
     return jsonify({"ok": True, "is_admin": False, "user": user})
 
 
-@app.route("/api/signup", methods=["POST"])
+def _hash_otp(code):
+    return hmac.new(_secret.encode(), code.encode(), hashlib.sha256).hexdigest()
+
+def _gen_otp():
+    return f"{secrets.randbelow(1_000_000):06d}"
+
+@app.route("/api/signup/start", methods=["POST"])
 @_rate_limit("5 per minute")
-def api_signup():
+def api_signup_start():
+    """Step 1: validate signup data, email a 6-digit OTP, stash the pending signup."""
     data     = request.json or {}
     fname    = (data.get("fname") or "").strip()
     lname    = (data.get("lname") or "").strip()
     email    = (data.get("email") or "").strip().lower()
     password = data.get("password") or ""
 
-    if not fname or not email or len(password) < 8:
+    if not fname or not email or "@" not in email or len(password) < 8:
         return jsonify({"error": "Invalid data"}), 400
 
     if db_find_user_by_email(email):
         return jsonify({"error": "Email already registered"}), 409
 
-    # FIX #4: bcrypt instead of SHA-256
+    code       = _gen_otp()
+    otp_hash   = _hash_otp(code)
+    expires_at = int(time.time() * 1000) + OTP_TTL_MS
+
+    db_create_pending_signup(email, fname, lname, hash_pass(password), otp_hash, expires_at)
+
+    sent, err = send_verification_email(email, fname, code)
+    if not sent:
+        return jsonify({"error": "Could not send verification email. Please try again."}), 502
+
+    return jsonify({"ok": True, "message": "Verification code sent", "expiresInSeconds": OTP_TTL_MS // 1000})
+
+
+@app.route("/api/signup/verify", methods=["POST"])
+@_rate_limit("10 per minute")
+def api_signup_verify():
+    """Step 2: check the OTP and create the real account."""
+    data  = request.json or {}
+    email = (data.get("email") or "").strip().lower()
+    code  = (data.get("code") or "").strip()
+
+    if not email or not code:
+        return jsonify({"error": "Missing email or code"}), 400
+
+    pending = db_get_pending_signup(email)
+    if not pending:
+        return jsonify({"error": "No pending signup found for this email. Please sign up again."}), 404
+
+    if int(time.time() * 1000) > pending["expires_at"]:
+        db_delete_pending_signup(email)
+        return jsonify({"error": "Code expired. Please sign up again."}), 410
+
+    if pending["attempts"] >= OTP_MAX_ATTEMPTS:
+        db_delete_pending_signup(email)
+        return jsonify({"error": "Too many incorrect attempts. Please sign up again."}), 429
+
+    if not hmac.compare_digest(_hash_otp(code), pending["otp_hash"]):
+        db_bump_pending_attempts(email)
+        remaining = OTP_MAX_ATTEMPTS - (pending["attempts"] + 1)
+        return jsonify({"error": f"Incorrect code. {max(remaining,0)} attempt(s) left."}), 401
+
+    if db_find_user_by_email(email):
+        db_delete_pending_signup(email)
+        return jsonify({"error": "Email already registered"}), 409
+
     uid = "e_" + secrets.token_urlsafe(12)   # FIX #7: secure random ID
     try:
-        db_create_user(uid, fname, lname, email, hash_pass(password), "email")
+        db_create_user(uid, pending["fname"], pending["lname"], email, pending["password_hash"], "email")
     except Exception:
+        db_delete_pending_signup(email)
         return jsonify({"error": "Email already registered"}), 409
+
+    db_delete_pending_signup(email)
 
     row  = db_find_user_by_email(email)
     user = _row_to_user(row)
     session["user"]     = user
     session["is_admin"] = False
     return jsonify({"ok": True, "user": user})
+
+
+@app.route("/api/signup/resend", methods=["POST"])
+@_rate_limit("3 per minute")
+def api_signup_resend():
+    """Resend a fresh OTP for an in-progress signup."""
+    data  = request.json or {}
+    email = (data.get("email") or "").strip().lower()
+    if not email:
+        return jsonify({"error": "Missing email"}), 400
+
+    pending = db_get_pending_signup(email)
+    if not pending:
+        return jsonify({"error": "No pending signup found for this email. Please sign up again."}), 404
+
+    code       = _gen_otp()
+    otp_hash   = _hash_otp(code)
+    expires_at = int(time.time() * 1000) + OTP_TTL_MS
+    db_create_pending_signup(email, pending["fname"], pending["lname"], pending["password_hash"], otp_hash, expires_at)
+
+    sent, err = send_verification_email(email, pending["fname"], code)
+    if not sent:
+        return jsonify({"error": "Could not send verification email. Please try again."}), 502
+
+    return jsonify({"ok": True, "message": "Verification code resent", "expiresInSeconds": OTP_TTL_MS // 1000})
 
 
 @app.route("/api/google-login", methods=["POST"])
@@ -1696,12 +1871,14 @@ def static_files(path):
 if __name__ == "__main__":
     print("\n🚀  VelvetSky — starting server")
     print(f"   Admin email : {ADMIN_EMAIL}")
+    print(f"   Resend from : {RESEND_FROM}")
     print(f"   DB file     : {DB_FILE}\n")
     app.run(debug=False, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
     
     import sys
     print("\n🚀  VelvetSky — starting server")
     print(f"   Admin email : {ADMIN_EMAIL}")
+    print(f"   Resend from : {RESEND_FROM}")
     print(f"   GitHub user : {GITHUB_USER or '(not set)'}")
     print(f"   R2 Worker   : {R2_WORKER_URL or '(not set)'}")
     print(f"   DB file     : {DB_FILE}")
