@@ -1637,6 +1637,29 @@ footer .logo{font-size:1.2rem;}
 </div>
 
 <!-- ══════════════════════════════════════════
+  MODAL: EMAIL VERIFICATION (OTP)
+══════════════════════════════════════════ -->
+<div class="modal-backdrop" id="otp-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:500;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">
+  <div style="background:#181410;border:1px solid var(--border-gold);border-radius:22px;padding:36px;width:100%;max-width:400px;position:relative;animation:fadeIn .25s ease;">
+    <button style="position:absolute;top:14px;right:18px;background:none;border:none;color:rgba(255,255,255,.4);font-size:1.4rem;cursor:pointer;line-height:1;" onclick="closeOtpModal()">×</button>
+    <div style="font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;color:var(--accent);margin-bottom:.2rem;">Check your inbox</div>
+    <div style="font-size:.82rem;color:var(--text-dim);margin-bottom:1.6rem;">We sent a 6-digit code to <strong id="otp-email-label" style="color:var(--text);"></strong></div>
+    <div class="form-group">
+      <label class="form-label">Verification Code</label>
+      <input class="form-input" type="text" id="otp-code" inputmode="numeric" pattern="[0-9]*" maxlength="6"
+             placeholder="123456" style="letter-spacing:.4em;text-align:center;font-size:1.2rem;"
+             onkeydown="if(event.key==='Enter')doVerifyOtp();">
+      <div class="form-error" id="otp-code-err">Enter the 6-digit code.</div>
+    </div>
+    <button class="btn-auth" id="otp-verify-btn" onclick="doVerifyOtp()">Verify &amp; Create Account →</button>
+    <div style="margin-top:1.1rem;text-align:center;font-size:.8rem;color:var(--muted);">
+      <span id="otp-timer">Code expires in 15:00</span><br>
+      Didn't get it? <a href="#" onclick="doResendOtp();return false;" style="color:var(--accent);cursor:pointer;text-decoration:none;" id="otp-resend-link">Resend code</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
   VIEW: FAVOURITES
 ══════════════════════════════════════════ -->
 <div class="view" id="view-favourites">
@@ -2469,6 +2492,10 @@ function checkStrength(pw) {
   label.style.color = colors[cls];
 }
 
+// Holds the in-progress signup between "start" (OTP sent) and "verify" (account created)
+let pendingSignup = null;   // { fname, lname, email }
+let otpTimerHandle = null;
+
 async function doSignUp() {
   const fname = document.getElementById('su-fname').value.trim();
   const lname = document.getElementById('su-lname').value.trim();
@@ -2487,25 +2514,19 @@ async function doSignUp() {
   if (!ok) return;
 
   const btn = document.getElementById('signup-btn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Creating account…'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending code…'; }
 
   try {
-    // Always go through server — never hash passwords client-side
-    const resp = await fetch('/api/signup', {
+    const resp = await fetch('/api/signup/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ fname, lname, email, password: pass }),
     });
     const data = await resp.json().catch(() => ({}));
     if (resp.ok && data.ok) {
-      const user = data.user;
-      users.push(user);
-      currentUser = user;
-      localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
-      setNavUser(currentUser);
-      goHome();
-      pushActivity('signup', fname + ' ' + lname);
-      showToast(`Account created! Welcome, ${fname}! 🎉`, 'success');
+      pendingSignup = { fname, lname, email };
+      openOtpModal(email, data.expiresInSeconds || 900);
+      showToast('Verification code sent! Check your inbox.', 'success');
     } else {
       const msg = data.error || 'Sign up failed. Please try again.';
       setErr('su-email-err', msg, true);
@@ -2518,6 +2539,101 @@ async function doSignUp() {
 }
 
 document.getElementById('su-password').addEventListener('keydown', e => { if(e.key==='Enter') doSignUp(); });
+
+function openOtpModal(email, expiresInSeconds) {
+  document.getElementById('otp-email-label').textContent = email;
+  document.getElementById('otp-code').value = '';
+  setErr('otp-code-err', '', false);
+  document.getElementById('otp-modal').style.display = 'flex';
+  document.getElementById('otp-code').focus();
+  startOtpTimer(expiresInSeconds);
+}
+
+function closeOtpModal() {
+  document.getElementById('otp-modal').style.display = 'none';
+  if (otpTimerHandle) { clearInterval(otpTimerHandle); otpTimerHandle = null; }
+}
+
+function startOtpTimer(seconds) {
+  if (otpTimerHandle) clearInterval(otpTimerHandle);
+  let remaining = seconds;
+  const label = document.getElementById('otp-timer');
+  const tick = () => {
+    const m = Math.floor(remaining / 60), s = remaining % 60;
+    label.textContent = remaining > 0
+      ? `Code expires in ${m}:${String(s).padStart(2,'0')}`
+      : 'Code expired — request a new one.';
+    if (remaining <= 0) { clearInterval(otpTimerHandle); otpTimerHandle = null; }
+    remaining--;
+  };
+  tick();
+  otpTimerHandle = setInterval(tick, 1000);
+}
+
+async function doVerifyOtp() {
+  if (!pendingSignup) { closeOtpModal(); return; }
+  const code = document.getElementById('otp-code').value.trim();
+  if (!/^\d{6}$/.test(code)) {
+    setErr('otp-code-err', 'Enter the 6-digit code.', true);
+    return;
+  }
+  setErr('otp-code-err', '', false);
+
+  const btn = document.getElementById('otp-verify-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Verifying…'; }
+
+  try {
+    const resp = await fetch('/api/signup/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: pendingSignup.email, code }),
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (resp.ok && data.ok) {
+      const user = data.user;
+      users.push(user);
+      currentUser = user;
+      localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+      setNavUser(currentUser);
+      closeOtpModal();
+      goHome();
+      pushActivity('signup', pendingSignup.fname + ' ' + pendingSignup.lname);
+      showToast(`Account created! Welcome, ${pendingSignup.fname}! 🎉`, 'success');
+      pendingSignup = null;
+    } else {
+      setErr('otp-code-err', data.error || 'Verification failed. Please try again.', true);
+    }
+  } catch(e) {
+    setErr('otp-code-err', 'Network error. Please try again.', true);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Verify & Create Account →'; }
+  }
+}
+
+async function doResendOtp() {
+  if (!pendingSignup) return;
+  const link = document.getElementById('otp-resend-link');
+  if (link) link.textContent = 'Sending…';
+
+  try {
+    const resp = await fetch('/api/signup/resend', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: pendingSignup.email }),
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (resp.ok && data.ok) {
+      startOtpTimer(data.expiresInSeconds || 900);
+      showToast('New code sent!', 'success');
+    } else {
+      showToast(data.error || 'Could not resend code.', 'error');
+    }
+  } catch(e) {
+    showToast('Network error. Please try again.', 'error');
+  } finally {
+    if (link) link.textContent = 'Resend code';
+  }
+}
 
 // ──────────────────────────────────────────
 // GALLERY
