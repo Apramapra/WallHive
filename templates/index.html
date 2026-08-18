@@ -1923,6 +1923,41 @@ async function uploadToR2(file) {
   return `${R2_BUCKET_PUBLIC_URL.replace(/\/$/, '')}/${key}`;
 }
 
+// ── CLIENT-SIDE THUMBNAIL GENERATOR ────────────────────
+// Downscales an image file to a small JPEG entirely in the browser (Canvas API,
+// no server dependency). This is what makes grid cards load fast: instead of
+// shipping the full-resolution wallpaper into every masonry tile, we ship a
+// ~480px-wide JPEG and only fetch the full image when the user opens the lightbox.
+async function generateThumbnail(file, maxDim = 480, quality = 0.72) {
+  const bitmap = await createImageBitmap(file);
+  try {
+    const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height));
+    const w = Math.max(1, Math.round(bitmap.width * scale));
+    const h = Math.max(1, Math.round(bitmap.height * scale));
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(bitmap, 0, 0, w, h);
+    const blob = await new Promise((resolve, reject) =>
+      canvas.toBlob(b => b ? resolve(b) : reject(new Error('toBlob failed')), 'image/jpeg', quality)
+    );
+    return new File([blob], 'thumb.jpg', { type: 'image/jpeg' });
+  } finally {
+    bitmap.close?.();
+  }
+}
+
+// Same idea but returns a small dataURL — used for the 'local' (base64-in-DB) storage path.
+async function generateThumbnailDataUrl(file, maxDim = 480, quality = 0.72) {
+  const thumbFile = await generateThumbnail(file, maxDim, quality);
+  return await new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = () => reject(new Error('FileReader failed'));
+    r.readAsDataURL(thumbFile);
+  });
+}
+
 // ── R2 DELETE FUNCTION ────────────────────
 async function deleteFromR2(url) {
   if (!r2Enabled() || !url || !url.startsWith(R2_BUCKET_PUBLIC_URL)) return;
@@ -2664,8 +2699,14 @@ function cardHTML(w, idx) {
   const favs = currentUser ? (currentUser.favs||[]) : [];
   const isFav = favs.includes(w.id);
   const _featBadge = w.isFeatured ? '<div class="featured-badge">&#9733; Featured</div>' : '';
+  // First few cards are above the fold on first paint — load them eagerly and
+  // at high priority instead of lazily, so the initial view isn't waiting on
+  // the lazy-load trigger. Everything after that stays lazy.
+  const _imgAttrs = idx < 6
+    ? 'loading="eager" fetchpriority="high" decoding="async"'
+    : 'loading="lazy" decoding="async"';
   return `<div class="wall-card" style="animation-delay:${idx*.05}s" onclick="openLightbox('${w.id}')">
-    ${_featBadge}<img src="${w.thumb||w.src}" alt="${w.tag}" loading="lazy" decoding="async">
+    ${_featBadge}<img src="${w.thumb||w.src}" alt="${w.tag}" ${_imgAttrs}>
     <div class="card-overlay">
       <div class="card-meta">
         <span class="card-tag">${w.tag}</span>
@@ -3940,12 +3981,28 @@ async function doWallyFileUpload() {
     return;
   }
 
+  // Generate a small thumbnail client-side and upload it separately so the
+  // gallery grid never has to load the full-resolution wallpaper.
+  let thumb = src;
+  try {
+    btn.textContent = '🖼 Making thumbnail…';
+    const thumbFile = await generateThumbnail(_wallyCreatorFile);
+    if (storedIn === 'github') {
+      const tfd = new FormData(); tfd.append('file', thumbFile);
+      const tResp = await fetch('/api/upload/github', { method: 'POST', body: tfd });
+      const tData = await tResp.json();
+      if (tResp.ok && tData.ok && tData.url) thumb = tData.url;
+    } else if (storedIn === 'r2') {
+      thumb = await uploadToR2(thumbFile);
+    }
+  } catch (e) { console.warn('[WallHive] Thumbnail generation failed, falling back to full image:', e); }
+
   btn.textContent = '🗄 Saving…';
   try {
     const resp = await fetch('/api/wallpapers', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ src, thumb: src, cat, tag, title: title || tag, desc, storedIn }),
+      body: JSON.stringify({ src, thumb, cat, tag, title: title || tag, desc, storedIn }),
     });
     const data = await resp.json();
     if (resp.ok && data.ok) {
@@ -4475,13 +4532,28 @@ async function doFileUpload() {
     return;
   }
 
+  // ── Step 2.5: Generate + upload a small thumbnail so grid cards stay light ──
+  let thumb = src;
+  try {
+    btn.textContent = '🖼 Making thumbnail…';
+    const thumbFile = await generateThumbnail(currentFile);
+    if (storedIn === 'github') {
+      const tfd = new FormData(); tfd.append('file', thumbFile);
+      const tResp = await fetch('/api/upload/github', { method: 'POST', body: tfd });
+      const tData = await tResp.json();
+      if (tResp.ok && tData.ok && tData.url) thumb = tData.url;
+    } else if (storedIn === 'r2') {
+      thumb = await uploadToR2(thumbFile);
+    }
+  } catch (e) { console.warn('[WallHive] Thumbnail generation failed, falling back to full image:', e); }
+
   // ── Step 3: Persist to SQLite — this is what EVERY device reads from ──
   btn.textContent = '🗄 Saving to DB…';
   try {
     const resp = await fetch('/api/wallpapers', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ src, thumb: src, cat, tag, title: title||tag, desc: description, storedIn }),
+      body: JSON.stringify({ src, thumb, cat, tag, title: title||tag, desc: description, storedIn }),
     });
     const data = await resp.json();
     if (resp.ok && data.ok) {
@@ -5461,9 +5533,20 @@ async function startBulkUpload() {
         const ghData = await ghResp.json();
         if (!ghResp.ok || !ghData.ok) throw new Error(ghData.error || 'GitHub upload failed');
         src = ghData.url; thumb = src; storedIn = 'github';
+        try {
+          const thumbFile = await generateThumbnail(item.file);
+          const tfd = new FormData(); tfd.append('file', thumbFile);
+          const tResp = await fetch('/api/upload/github', { method: 'POST', body: tfd });
+          const tData = await tResp.json();
+          if (tResp.ok && tData.ok && tData.url) thumb = tData.url;
+        } catch (e) { console.warn('[WallHive] Bulk thumbnail (github) failed, using full image:', e); }
       } else if (store === 'r2') {
         src = await uploadToR2(item.file);
         thumb = src; storedIn = 'r2';
+        try {
+          const thumbFile = await generateThumbnail(item.file);
+          thumb = await uploadToR2(thumbFile);
+        } catch (e) { console.warn('[WallHive] Bulk thumbnail (r2) failed, using full image:', e); }
       } else {
         src = await new Promise(function(res, rej) {
           const r = new FileReader();
@@ -5472,6 +5555,9 @@ async function startBulkUpload() {
           r.readAsDataURL(item.file);
         });
         thumb = src; storedIn = 'local';
+        try {
+          thumb = await generateThumbnailDataUrl(item.file);
+        } catch (e) { console.warn('[WallHive] Bulk thumbnail (local) failed, using full image:', e); }
       }
       _bulkSetPct(i, 60);
       // AI vision analysis — get title, description, category
