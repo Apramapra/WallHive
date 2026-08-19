@@ -2103,16 +2103,21 @@ async function restoreSession() {
 
     // Verify the session is still alive on the server
     let serverUser = null;
+    let serverReachable = false;
     try {
       const r = await fetch('/api/me');
+      serverReachable = true;
       if (r.ok) {
         const d = await r.json();
         serverUser = d.user || null;
       }
-    } catch(e) { /* server unreachable — fall through to localStorage */ }
+    } catch(e) { /* server unreachable — fall through to localStorage, don't log out */ }
 
-    // If server says no session, clear localStorage and bail
-    if (serverUser === null) {
+    // Only clear the session if the server was actually reachable and explicitly
+    // said there's no active session. A network hiccup must NOT log the user out —
+    // that was the bug: an unreachable server was being treated the same as an
+    // explicit "no session" response.
+    if (serverReachable && serverUser === null) {
       localStorage.removeItem(SESSION_KEY);
       return;
     }
