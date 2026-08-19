@@ -155,7 +155,7 @@ GH_DB_TOKEN  = os.environ.get("GH_DB_TOKEN",  GITHUB_TOKEN)
 GH_DB_USER   = os.environ.get("GH_DB_USER",   GITHUB_USER)
 GH_DB_REPO   = os.environ.get("GH_DB_REPO",   "")
 GH_DB_BRANCH = os.environ.get("GH_DB_BRANCH", "main")
-GH_DB_FILE   = "velvetsky-db.json"
+GH_DB_FILE   = "walldrop-db.json"  # must match the frontend's GH_DB_FILE constant — these were out of sync
 
 # Cloudflare R2 — optional
 R2_WORKER_URL        = os.environ.get("R2_WORKER_URL",        "")
