@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WallHive – For Your Every Background Need</title>
+<meta name="description" content="A curated wallpaper library for every screen. Sign in or create a free account to browse and download.">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#0a0a0a;--surface:#141414;--card:#1a1a1a;
+  --border:rgba(255,255,255,0.07);--border-hover:rgba(255,255,255,0.15);
+  --text:#f0ede8;--muted:#7a7672;
+  --accent:#e8d5a3;--accent2:#c9a96e;--pill-bg:rgba(232,213,163,0.1);
+  --text-mid:rgba(255,255,255,0.68);--text-dim:rgba(255,255,255,0.38);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color:var(--text);overflow-x:hidden;min-height:100vh;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:rgba(232,213,163,.2);border-radius:4px;}
+
+h1,h2,h3{font-family:'Syne',sans-serif;letter-spacing:-.01em;}
+
+nav{
+  position:fixed;top:0;left:0;width:100%;z-index:200;
+  background:rgba(10,10,10,0.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2.5rem;height:64px;
+}
+.brand{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:var(--text);letter-spacing:-.02em;display:flex;align-items:center;gap:.5rem;text-decoration:none;}
+.brand-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block;}
+.nav-actions{display:flex;gap:.7rem;align-items:center;}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  font-family:'DM Sans',sans-serif;font-weight:500;font-size:.88rem;
+  padding:.68rem 1.35rem;border-radius:8px;cursor:pointer;
+  text-decoration:none;border:1px solid transparent;transition:.2s;white-space:nowrap;
+}
+.btn-fill{background:var(--accent);color:#151208;}
+.btn-fill:hover{background:var(--accent2);transform:translateY(-1px);}
+.btn-outline{background:transparent;border-color:var(--border-hover);color:var(--text);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);}
+.btn-lg{padding:.95rem 2rem;font-size:1rem;}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:120px 1.5rem 80px;position:relative;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;z-index:-1;
+  background:
+    radial-gradient(ellipse 60% 45% at 50% 0%, rgba(232,213,163,.09), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 85% 90%, rgba(201,169,110,.06), transparent 70%);
+}
+.hero-eyebrow{
+  font-size:.78rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent);background:var(--pill-bg);border:1px solid rgba(232,213,163,.25);
+  padding:.4rem 1rem;border-radius:99px;margin-bottom:1.6rem;
+}
+.hero h1{
+  font-size:clamp(2.4rem,6vw,4.4rem);font-weight:800;line-height:1.05;
+  max-width:900px;margin-bottom:1.3rem;
+}
+.hero h1 span{color:var(--accent);}
+.hero p{
+  font-size:clamp(1rem,1.6vw,1.2rem);color:var(--text-mid);max-width:560px;
+  line-height:1.6;margin-bottom:2.4rem;font-weight:300;
+}
+.hero-ctas{display:flex;gap:.9rem;flex-wrap:wrap;justify-content:center;margin-bottom:3.2rem;}
+.hero-note{font-size:.82rem;color:var(--text-dim);}
+
+/* Decorative wallpaper grid preview (no real data — purely visual) */
+.preview-grid{
+  display:grid;grid-template-columns:repeat(6,1fr);gap:10px;
+  width:100%;max-width:1000px;margin-top:1rem;opacity:.9;
+}
+.preview-grid div{
+  aspect-ratio:2/3;border-radius:10px;border:1px solid var(--border);
+  background:linear-gradient(160deg,var(--card),var(--surface));
+}
+.preview-grid div:nth-child(2n){aspect-ratio:1/1;}
+.preview-grid div:nth-child(3n){background:linear-gradient(160deg,rgba(232,213,163,.12),var(--card));}
+@media(max-width:800px){.preview-grid{grid-template-columns:repeat(3,1fr);}}
+
+/* ── FEATURES ── */
+.features{padding:100px 1.5rem;max-width:1100px;margin:0 auto;}
+.features h2{
+  text-align:center;font-size:clamp(1.7rem,3.4vw,2.4rem);font-weight:700;margin-bottom:.8rem;
+}
+.features > p{text-align:center;color:var(--text-mid);max-width:520px;margin:0 auto 3.2rem;font-size:1rem;line-height:1.6;}
+.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;}
+.feature-card{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:1.8rem 1.6rem;transition:.2s;
+}
+.feature-card:hover{border-color:var(--border-hover);transform:translateY(-2px);}
+.feature-icon{
+  width:42px;height:42px;border-radius:10px;background:var(--pill-bg);
+  display:flex;align-items:center;justify-content:center;margin-bottom:1rem;color:var(--accent);
+}
+.feature-card h3{font-size:1.05rem;font-weight:600;margin-bottom:.5rem;}
+.feature-card p{font-size:.88rem;color:var(--text-mid);line-height:1.55;font-weight:300;}
+@media(max-width:760px){.feature-grid{grid-template-columns:1fr;}}
+
+/* ── CTA BAND ── */
+.cta-band{
+  margin:60px auto 100px;max-width:1000px;padding:3.2rem 2rem;border-radius:20px;
+  background:linear-gradient(135deg,rgba(232,213,163,.08),rgba(20,20,20,.4));
+  border:1px solid rgba(232,213,163,.18);
+  text-align:center;
+}
+.cta-band h2{font-size:clamp(1.5rem,3vw,2rem);font-weight:700;margin-bottom:.7rem;}
+.cta-band p{color:var(--text-mid);margin-bottom:1.8rem;font-size:.98rem;}
+.cta-band .hero-ctas{margin-bottom:0;}
+
+footer{
+  border-top:1px solid var(--border);padding:2.2rem 1.5rem;text-align:center;
+  color:var(--text-dim);font-size:.82rem;
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="brand" href="/"><span class="brand-dot"></span>WallHive</a>
+  <div class="nav-actions">
+    <a class="btn btn-outline" href="/app#signin">Sign In</a>
+    <a class="btn btn-fill" href="/app#signup">Sign Up</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-eyebrow">Free · Growing library · New drops weekly</div>
+  <h1>Wallpapers for <span>every</span> screen, curated&nbsp;properly.</h1>
+  <p>WallHive is a hand-picked wallpaper library for desktop and mobile. Create a free account to browse the full collection, save favourites, and download in full resolution.</p>
+  <div class="hero-ctas">
+    <a class="btn btn-fill btn-lg" href="/app#signup">Create Free Account</a>
+    <a class="btn btn-outline btn-lg" href="/app#signin">Sign In</a>
+  </div>
+  <div class="hero-note">An account is required to browse and download — takes about 20 seconds.</div>
+  <div class="preview-grid" aria-hidden="true">
+    <div></div><div></div><div></div><div></div><div></div><div></div>
+  </div>
+</section>
+
+<section class="features">
+  <h2>Why WallHive</h2>
+  <p>Built for people who actually care what's on their screen.</p>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      </div>
+      <h3>Curated, not dumped</h3>
+      <p>Every wallpaper is reviewed before it goes live — no low-effort filler, no stolen stock photos.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 12h18"/></svg>
+      </div>
+      <h3>Full resolution downloads</h3>
+      <p>What you see is what you get — no watermarks, no upsells, no "premium" paywalled tier.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6c-1.6-1.6-4.2-1.6-5.8 0L12 7.6l-3-3c-1.6-1.6-4.2-1.6-5.8 0-1.6 1.6-1.6 4.2 0 5.8l8.8 8.8 8.8-8.8c1.6-1.6 1.6-4.2 0-5.8z"/></svg>
+      </div>
+      <h3>Save your favourites</h3>
+      <p>Sign in once and your favourites follow you — build a personal collection across sessions.</p>
+    </div>
+  </div>
+</section>
+
+<div class="cta-band">
+  <h2>Ready to browse?</h2>
+  <p>Sign up free — no card, no spam, just wallpapers.</p>
+  <div class="hero-ctas">
+    <a class="btn btn-fill btn-lg" href="/app#signup">Create Free Account</a>
+    <a class="btn btn-outline btn-lg" href="/app#signin">I already have an account</a>
+  </div>
+</div>
+
+<footer>
+  &copy; <span id="yr"></span> WallHive. All wallpapers property of their respective creators.
+</footer>
+
+<script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
+</body>
+</html>
