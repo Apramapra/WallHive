@@ -1168,6 +1168,7 @@ def api_config():
 # Wallpapers
 # ──────────────────────────────────────────────────────────────────────────────
 @app.route("/api/wallpapers", methods=["GET"])
+@login_required
 def api_get_wallpapers():
     walls = db_get_wallpapers()
     etag  = hashlib.md5(json.dumps(walls, sort_keys=True).encode()).hexdigest()
@@ -1842,7 +1843,29 @@ def api_ai_analyse():
 # Serve frontend
 # ──────────────────────────────────────────────────────────────────────────────
 @app.route("/")
+def landing():
+    """Public marketing landing page — no auth required."""
+    filepath = os.path.join(app.template_folder, "landing.html")
+    try:
+        mtime         = os.path.getmtime(filepath)
+        last_modified = time.strftime("%a, %d %b %Y %H:%M:%S GMT", time.gmtime(mtime))
+        if_modified   = request.headers.get("If-Modified-Since")
+        if if_modified == last_modified:
+            return "", 304
+        resp = make_response(send_from_directory("templates", "landing.html"))
+        resp.headers["Cache-Control"] = "public, max-age=300"
+        resp.headers["Last-Modified"] = last_modified
+        return resp
+    except Exception:
+        return send_from_directory("templates", "landing.html")
+
+@app.route("/app")
 def index():
+    """The main WallHive application (gallery, auth views, admin panel, etc).
+    The HTML shell itself is served to anyone — the client-side app forces
+    an unauthenticated visitor into the sign-in/sign-up view immediately
+    (see the auth gate in index.html). Real data enforcement happens at
+    the API layer: GET /api/wallpapers requires a session (see below)."""
     filepath = os.path.join(app.template_folder, "index.html")
     try:
         mtime         = os.path.getmtime(filepath)
