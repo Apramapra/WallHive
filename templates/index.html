@@ -2010,6 +2010,10 @@ async function recordDownload(wallId, cat, title) {
 let wallpapers = [];
 let users = [];
 let currentUser = null;
+// Auth gate: true whenever a visitor has not signed in yet. While true, _activateView()
+// refuses to show any view except sign-in/sign-up, no matter how navigation is triggered
+// (nav clicks, hash changes, back/forward). Cleared the moment login/signup succeeds.
+let _authGateActive = false;
 let _cpCreatorId = null; // currently-viewed creator profile id (for #creator/<id> deep links)
 let activeCat = 'all';
 let fileBase64 = null;
@@ -2090,7 +2094,20 @@ async function loadData() {
   }
 
   await restoreSession();
-  applyInitialHash();
+
+  // ── AUTH GATE ────────────────────────────────────────────────────────────
+  // Everybody must sign in or sign up to use WallHive. If restoreSession()
+  // didn't find a valid session, force the sign-in view and refuse to route
+  // anywhere else until the visitor authenticates (enforced in _activateView).
+  if (!currentUser) {
+    _authGateActive = true;
+    // Respect the visitor's intended entry point (e.g. the landing page's
+    // "Sign Up" button links to /app#signup) instead of always forcing Sign In.
+    if (location.hash.toLowerCase() === '#signup') showSignUp();
+    else showSignIn();
+  } else {
+    applyInitialHash();
+  }
   await loadGHConfig();
 }
 
@@ -2185,6 +2202,11 @@ const VIEW_TO_HASH = {
  * All other functions call this; URL updates happen at the caller level.
  */
 function _activateView(id) {
+  // Auth gate: an unauthenticated visitor can only ever land on sign-in/sign-up,
+  // regardless of what triggered navigation (nav link, hash edit, back/forward).
+  if (_authGateActive && id !== 'view-signin' && id !== 'view-signup') {
+    id = 'view-signin';
+  }
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   const el = document.getElementById(id);
   if (el) el.classList.add('active');
@@ -2299,7 +2321,7 @@ function applyInitialHash() {
   if (id === 'view-creators')         loadCreatorStatus();
 }
 
-function goHome()          { showView('view-gallery');    renderGallery(); }
+function goHome()          { _authGateActive = false; showView('view-gallery'); renderGallery(); }
 function showSignIn()      { showView('view-signin');     checkGoogleConfig('signin-google-notice'); }
 function showSignUp()      { showView('view-signup');     checkGoogleConfig('signup-google-notice'); }
 function showFavourites()  { if (!currentUser) { showSignIn(); return; } showView('view-favourites'); renderFavourites(); }
@@ -2346,16 +2368,17 @@ function setNavUser(user) {
     const avatarHtml = user.picture
       ? `<img class="user-avatar" src="${user.picture}" alt="" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="user-avatar-initials" style="display:none">${initials}</div>`
       : `<div class="user-avatar-initials">${initials}</div>`;
+    const _navName = escapeHTML(user.fname||'') + (user.lname ? ' ' + escapeHTML(user.lname) : '');
     actions.innerHTML = `
       <div class="user-pill" onclick="showUserMenu()">
         ${avatarHtml}
-        <span class="user-name">${user.fname}${user.lname?' '+user.lname:''}</span>
+        <span class="user-name">${_navName}</span>
       </div>
       <button class="btn btn-outline" style="padding:7px 16px;font-size:.83rem;" onclick="signOut()">Sign Out</button>`;
     if (mobActions) mobActions.innerHTML = `
       <div class="user-pill" onclick="showUserMenu();closeMobileMenu();" style="justify-content:flex-start;">
         ${avatarHtml}
-        <span class="user-name">${user.fname}${user.lname?' '+user.lname:''}</span>
+        <span class="user-name">${_navName}</span>
       </div>
       <button class="btn btn-outline" style="width:100%;margin-top:.5rem;" onclick="signOut();closeMobileMenu();">Sign Out</button>`;
   } else {
@@ -2380,7 +2403,9 @@ async function signOut() {
     try { google.accounts.id.disableAutoSelect(); } catch(e){}
   }
   showToast('Signed out successfully.','success');
-  goHome();
+  // Re-activate the auth gate — signing out must return to sign-in, not gallery.
+  _authGateActive = true;
+  showSignIn();
 }
 
 // ──────────────────────────────────────────
@@ -2428,7 +2453,7 @@ async function handleGoogleCredential(response) {
       localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
       setNavUser(currentUser);
       goHome();
-      showToast(`Welcome, ${currentUser.fname}! 🎉`, 'success');
+      showToast(`Welcome, ${escapeHTML(currentUser.fname)}! 🎉`, 'success');
     } else {
       showToast(data.error || 'Google sign-in failed.', 'error');
     }
@@ -2711,10 +2736,10 @@ function cardHTML(w, idx) {
     ? 'loading="eager" fetchpriority="high" decoding="async"'
     : 'loading="lazy" decoding="async"';
   return `<div class="wall-card" style="animation-delay:${idx*.05}s" onclick="openLightbox('${w.id}')">
-    ${_featBadge}<img src="${w.thumb||w.src}" alt="${w.tag}" ${_imgAttrs}>
+    ${_featBadge}<img src="${w.thumb||w.src}" alt="${escapeHTML(w.tag)}" ${_imgAttrs}>
     <div class="card-overlay">
       <div class="card-meta">
-        <span class="card-tag">${w.tag}</span>
+        <span class="card-tag">${escapeHTML(w.tag)}</span>
         <div style="display:flex;gap:6px;align-items:center;">
           ${currentUser?`<button class="card-fav${isFav?' active':''}" title="Favourite" onclick="event.stopPropagation();toggleFav('${w.id}',this)">${heartIcon}</button>`:''}
           <div class="card-dl" title="Download" onclick="event.stopPropagation();downloadWall('${w.id}')">${dlIcon}</div>
@@ -2893,8 +2918,8 @@ function openLightbox(id) {
   const relEl = document.getElementById('lb-related');
   if (relEl) {
     relEl.innerHTML = related.map(r=>
-      `<div class="lb-related-card" onclick="openLightbox('${r.id}')" title="${r.title||r.tag}">
-        <img src="${r.thumb||r.src}" alt="${r.tag}" loading="lazy">
+      `<div class="lb-related-card" onclick="openLightbox('${r.id}')" title="${escapeHTML(r.title||r.tag)}">
+        <img src="${r.thumb||r.src}" alt="${escapeHTML(r.tag)}" loading="lazy">
       </div>`
     ).join('');
   }
@@ -3812,9 +3837,9 @@ function renderWallyCreatorGrid() {
   if (!g) return;
   if (!_wallyCreatorWalls.length) { g.innerHTML = '<p style="color:rgba(255,255,255,.3)">You haven\'t uploaded any wallpapers yet.</p>'; return; }
   g.innerHTML = _wallyCreatorWalls.map(w => `<div class="manage-card">
-    <div class="manage-card-img"><img src="${w.thumb||w.src}" alt="${w.tag}" loading="lazy"></div>
+    <div class="manage-card-img"><img src="${w.thumb||w.src}" alt="${escapeHTML(w.tag)}" loading="lazy"></div>
     <div class="manage-card-body">
-      <span class="manage-card-tag">${w.tag}</span>
+      <span class="manage-card-tag">${escapeHTML(w.tag)}</span>
       <div class="manage-card-title">${escapeHTML(w.title||w.id)}</div>
       <div style="font-size:.76rem;color:var(--muted);margin:2px 0 8px;">${w.downloadCount} downloads</div>
       <div class="manage-card-actions">
@@ -4591,10 +4616,10 @@ function renderManageGrid() {
   const g=document.getElementById('manage-grid');
   if (!wallpapers.length) { g.innerHTML='<p style="color:rgba(255,255,255,.3)">No wallpapers.</p>'; return; }
   g.innerHTML=wallpapers.map(w=>`<div class="manage-card${w.isFeatured?' is-featured':''}">
-    <div class="manage-card-img"><img src="${w.thumb||w.src}" alt="${w.tag}" loading="lazy"></div>
+    <div class="manage-card-img"><img src="${w.thumb||w.src}" alt="${escapeHTML(w.tag)}" loading="lazy"></div>
     <div class="manage-card-body">
-      <span class="manage-card-tag">${w.tag}</span>
-      <div class="manage-card-title">${w.title||w.id}</div>
+      <span class="manage-card-tag">${escapeHTML(w.tag)}</span>
+      <div class="manage-card-title">${escapeHTML(w.title||w.id)}</div>
       <div class="manage-card-actions">
         <button class="btn-feature${w.isFeatured?' active':''}" onclick="toggleFeature('${w.id}')">${w.isFeatured?'&#9733; Featured':'&#9734; Pin'}</button>
         <button class="btn-edit-meta" onclick="openEditMeta('${w.id}')">&#9998; Edit</button>
@@ -4656,7 +4681,7 @@ async function renderUsersTable() {
     return;
   }
   const rows = filtered.map(u => {
-    const initials = ((u.fname||'?')[0]+(u.lname||'')[0]||'').toUpperCase();
+    const initials = escapeHTML(((u.fname||'?')[0]+(u.lname||'')[0]||'').toUpperCase());
     const avatar = u.picture
       ? `<img class="user-table-avatar" src="${u.picture}" alt="" referrerpolicy="no-referrer">`
       : `<span class="user-table-avatar-initials">${initials}</span>`;
@@ -4665,8 +4690,8 @@ async function renderUsersTable() {
       : `<span class="user-provider-badge email">Email</span>`;
     const joined = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—';
     return `<tr>
-      <td><span class="user-table-name">${avatar}<span>${u.fname||''} ${u.lname||''}</span></span></td>
-      <td style="color:var(--text-mid)">${u.email||'—'}</td>
+      <td><span class="user-table-name">${avatar}<span>${escapeHTML(u.fname||'')} ${escapeHTML(u.lname||'')}</span></span></td>
+      <td style="color:var(--text-mid)">${escapeHTML(u.email||'—')}</td>
       <td>${providerBadge}</td>
       <td style="color:var(--text-dim);font-size:.8rem">${joined}</td>
       <td><button class="btn-delete-user" onclick="deleteUser('${u.id}')">Remove</button></td>
