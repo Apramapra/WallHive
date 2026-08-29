@@ -1860,8 +1860,22 @@ def landing():
         return send_from_directory("templates", "landing.html")
 
 @app.route("/app")
-def index():
+@app.route("/app/gallery")
+@app.route("/app/signin")
+@app.route("/app/signup")
+@app.route("/app/favourites")
+@app.route("/app/wally")
+@app.route("/app/wally/main")
+@app.route("/app/creators")
+@app.route("/app/wall/<wall_id>")
+@app.route("/app/creator/<uid>")
+def index(wall_id=None, uid=None):
     """The main WallHive application (gallery, auth views, admin panel, etc).
+    All of these real paths (no # fragments) serve the same SPA shell — the
+    client-side router in index.html reads location.pathname and shows the
+    matching view. Every one of these routes must exist here so a direct
+    visit or a page refresh on e.g. /app/signup or /app/wall/<id> works,
+    not just in-app client-side navigation.
     The HTML shell itself is served to anyone — the client-side app forces
     an unauthenticated visitor into the sign-in/sign-up view immediately
     (see the auth gate in index.html). Real data enforcement happens at
