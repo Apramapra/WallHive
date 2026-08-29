@@ -299,34 +299,68 @@ nav{
 .card-fav.active svg{fill:#ff6b6b;}
 
 /* ─────────────────────────────────────────────
-   AUTH PAGES  (index__17__ palette)
+   AUTH PAGES — floating glass card over an
+   animated wallpaper mosaic (matches WallHive's
+   own product: the login page IS a gallery).
 ───────────────────────────────────────────── */
-.auth-page{min-height:100vh;display:flex;position:relative;overflow:hidden;background:var(--bg);}
-.auth-left{width:45%;flex-shrink:0;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;padding:48px;}
-.auth-left-bg{
-  position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(0,0,0,.7) 0%,rgba(0,0,0,.2) 50%,rgba(0,0,0,.65) 100%),
-    url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=85') center/cover no-repeat;
+.auth-scene{min-height:100vh;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:32px 20px;background:#050505;}
+
+/* Animated mosaic of real WallHive wallpapers, filling the whole background */
+.auth-mosaic{position:absolute;inset:-2%;display:grid;grid-template-columns:repeat(6,1fr);gap:6px;z-index:0;transform:scale(1.04);}
+.auth-tile{position:relative;border-radius:4px;overflow:hidden;background-size:cover;background-position:center;animation:authTileBreathe 9s ease-in-out infinite;filter:saturate(.9);}
+.auth-tile:nth-child(3n){animation-duration:11s;}
+.auth-tile:nth-child(4n){animation-duration:13s;animation-delay:-3s;}
+.auth-tile:nth-child(5n){animation-delay:-6s;}
+.auth-tile:nth-child(2n){animation-delay:-2s;}
+@keyframes authTileBreathe{
+  0%,100%{transform:scale(1);opacity:.55;}
+  50%{transform:scale(1.08);opacity:.85;}
 }
-.auth-left-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(to right,rgba(10,10,10,.5),transparent);}
-.auth-left-content{position:relative;z-index:2;}
-.auth-brand{font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;letter-spacing:-.03em;color:var(--text);}
-.auth-brand span{color:var(--accent);}
-.auth-brand-sub{font-size:.9rem;color:rgba(255,255,255,.5);margin-top:.3rem;letter-spacing:.01em;}
-.auth-left-quote{position:relative;z-index:2;}
-.auth-quote-text{font-family:'Syne',sans-serif;font-weight:700;font-size:clamp(1.6rem,3vw,2.4rem);line-height:1.1;letter-spacing:-.02em;color:#fff;}
-.auth-quote-sub{font-size:.85rem;color:rgba(255,255,255,.45);margin-top:.8rem;}
-.auth-previews{position:absolute;right:-20px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:2;}
-.auth-preview-card{width:90px;height:58px;border-radius:10px;overflow:hidden;opacity:.65;transition:opacity .3s;box-shadow:0 4px 20px rgba(0,0,0,.5);}
-.auth-preview-card:hover{opacity:1;}
-.auth-preview-card img{width:100%;height:100%;object-fit:cover;}
-.auth-right{flex:1;background:var(--surface);display:flex;align-items:center;justify-content:center;padding:48px 40px;position:relative;overflow-y:auto;}
-.auth-right::before{content:'';position:absolute;top:0;left:0;width:1px;height:100%;background:linear-gradient(to bottom,transparent,rgba(232,213,163,.15),transparent);}
-.auth-form-wrap{width:100%;max-width:400px;}
-.auth-form-title{font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;letter-spacing:-.03em;color:var(--text);margin-bottom:.3rem;}
-.auth-form-sub{font-size:.88rem;color:var(--muted);margin-bottom:2rem;line-height:1.5;}
+@media(prefers-reduced-motion:reduce){.auth-tile{animation:none;opacity:.65;}}
+
+/* Dark scrim + vignette so the glass card stays legible */
+.auth-scrim{position:absolute;inset:0;z-index:1;
+  background:
+    radial-gradient(ellipse 60% 55% at 50% 50%, rgba(5,5,5,.35) 0%, rgba(5,5,5,.86) 68%, rgba(5,5,5,.96) 100%),
+    linear-gradient(180deg, rgba(5,5,5,.5), rgba(5,5,5,.75));
+}
+
+/* The floating glass card itself */
+.auth-card{position:relative;z-index:2;width:100%;max-width:420px;
+  background:rgba(20,20,20,.62);
+  backdrop-filter:blur(28px) saturate(140%);-webkit-backdrop-filter:blur(28px) saturate(140%);
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:22px;
+  padding:2.6rem 2.2rem 2.2rem;
+  box-shadow:0 24px 70px rgba(0,0,0,.55), 0 0 0 1px rgba(232,213,163,.05) inset, 0 1px 0 rgba(255,255,255,.06) inset;
+  animation:authCardIn .5s cubic-bezier(.16,1,.3,1);
+}
+@keyframes authCardIn{from{opacity:0;transform:translateY(14px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+
+.auth-card-brand{display:flex;align-items:center;justify-content:center;gap:.5rem;font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;letter-spacing:-.02em;color:var(--text);text-decoration:none;margin-bottom:1.6rem;}
+.auth-card-brand span{color:var(--accent);}
+.auth-card-brand .brand-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px rgba(232,213,163,.7);}
+
+/* Sign In / Sign Up switch pill */
+.auth-toggle-pill{display:flex;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:99px;padding:4px;margin-bottom:1.8rem;position:relative;}
+.auth-toggle-opt{flex:1;text-align:center;padding:.55rem 0;border-radius:99px;font-size:.85rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .2s;position:relative;z-index:1;}
+.auth-toggle-opt.active{color:#151208;}
+.auth-toggle-pill::before{content:'';position:absolute;top:4px;left:4px;width:calc(50% - 4px);height:calc(100% - 8px);border-radius:99px;background:var(--accent);transition:transform .28s cubic-bezier(.16,1,.3,1);z-index:0;}
+.auth-toggle-pill.pos-right::before{transform:translateX(100%);}
+
+.auth-form-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.7rem;letter-spacing:-.02em;color:var(--text);margin-bottom:.3rem;text-align:center;}
+.auth-form-sub{font-size:.84rem;color:var(--muted);margin-bottom:1.7rem;line-height:1.5;text-align:center;}
 .auth-form-sub a,.auth-form-sub span{color:var(--accent);cursor:pointer;text-decoration:none;}
 .auth-form-sub a:hover,.auth-form-sub span:hover{color:var(--accent2);}
+
+.auth-card-footer{margin-top:1.5rem;text-align:center;font-size:.8rem;color:var(--muted);}
+.auth-card-footer a{color:var(--accent);cursor:pointer;text-decoration:none;}
+.auth-card-footer a:hover{color:var(--accent2);}
+
+@media(max-width:520px){
+  .auth-card{padding:2.1rem 1.4rem 1.8rem;border-radius:18px;}
+  .auth-mosaic{grid-template-columns:repeat(4,1fr);}
+}
 
 /* Google button */
 .btn-google{width:100%;display:flex;align-items:center;justify-content:center;gap:12px;background:rgba(255,255,255,.05);border:1px solid var(--border-hover);border-radius:12px;padding:13px 20px;font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:400;color:var(--text);cursor:pointer;transition:background .2s,border-color .2s,transform .15s;margin-bottom:1.5rem;}
@@ -335,17 +369,17 @@ nav{
 .google-icon{width:20px;height:20px;flex-shrink:0;}
 
 /* Divider */
-.auth-divider{display:flex;align-items:center;gap:14px;margin-bottom:1.5rem;}
+.auth-divider{display:flex;align-items:center;gap:14px;margin-bottom:1.4rem;}
 .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border);}
-.auth-divider span{font-size:.75rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;}
+.auth-divider span{font-size:.72rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;}
 
 /* Form fields */
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .form-group{margin-bottom:1rem;}
-.form-label{display:block;font-size:.75rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.45rem;}
+.form-label{display:block;font-size:.72rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem;}
 .form-input-wrap{position:relative;}
-.form-input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-family:'DM Sans',sans-serif;font-size:.95rem;color:var(--text);outline:none;transition:border-color .2s,background .2s;}
-.form-input:focus{border-color:rgba(232,213,163,.4);background:rgba(232,213,163,.02);}
+.form-input{width:100%;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px 16px;font-family:'DM Sans',sans-serif;font-size:.95rem;color:var(--text);outline:none;transition:border-color .2s,background .2s,box-shadow .2s;}
+.form-input:focus{border-color:rgba(232,213,163,.55);background:rgba(232,213,163,.04);box-shadow:0 0 0 3px rgba(232,213,163,.08);}
 .form-input::placeholder{color:var(--muted);}
 .form-input.err{border-color:rgba(255,80,80,.5);}
 .input-icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);cursor:pointer;font-size:1rem;user-select:none;}
@@ -370,10 +404,10 @@ nav{
 .form-check a{color:var(--accent);text-decoration:none;}
 
 /* Submit */
-.btn-auth{width:100%;padding:13px;border-radius:100px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:500;cursor:pointer;border:none;background:var(--accent);color:#1a1400;transition:opacity .2s,transform .15s;display:flex;align-items:center;justify-content:center;gap:10px;}
-.btn-auth:hover{opacity:.85;transform:translateY(-1px);}
+.btn-auth{width:100%;padding:13px;border-radius:100px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;border:none;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#1a1400;transition:box-shadow .2s,transform .15s;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 8px 24px rgba(232,213,163,.18);}
+.btn-auth:hover{box-shadow:0 10px 30px rgba(232,213,163,.32);transform:translateY(-1px);}
 .btn-auth:active{transform:translateY(0);}
-.btn-auth:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-auth:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
 
 /* Forgot password */
 .forgot-link{text-align:right;margin-top:-.4rem;margin-bottom:1.2rem;}
@@ -572,8 +606,6 @@ footer .logo{font-size:1.2rem;}
   .wallpaper-grid{columns:2;}
   .upload-form{grid-template-columns:1fr;}
   .upload-form .span2{grid-column:span 1;}
-  .auth-left{display:none;}
-  .auth-right{padding:60px 28px;}
   .admin-stats{grid-template-columns:repeat(2,1fr);}
   /* analytics grid: side-by-side on tablet too */
 }
@@ -613,7 +645,6 @@ footer .logo{font-size:1.2rem;}
   .section-label{font-size:.95rem;}
 
   /* Auth */
-  .auth-right{padding:48px 20px 40px;}
   .auth-form-title{font-size:1.5rem;}
   .form-row{grid-template-columns:1fr;}
   .btn-auth{padding:12px;}
@@ -858,17 +889,17 @@ footer .logo{font-size:1.2rem;}
 <nav id="main-nav">
   <div class="logo" onclick="goHome()">Wall<span>Hive</span></div>
   <ul class="nav-links">
-    <li><a href="#gallery" onclick="goHome();return false;">Home</a></li>
-    <li><a href="#gallery" onclick="goHome();return false;">Wallpapers</a></li>
-    <li id="nav-favs-li" style="display:none;"><a href="#favourites" onclick="showFavourites();return false;">Favourites</a></li>
-    <li id="nav-creators-li" style="display:none;"><a href="#creators" onclick="showCreatorsPage();return false;" id="nav-creators-link">Become a Creator</a></li>
-    <li id="nav-wally-panel-li" style="display:none;"><a href="#wally-panel" onclick="openWallyPanel();return false;">Wally Panel</a></li>
-    <li><a href="#wally" onclick="showWallyDirectory();return false;">Wally</a></li>
+    <li><a href="/app" onclick="goHome();return false;">Home</a></li>
+    <li><a href="/app" onclick="goHome();return false;">Wallpapers</a></li>
+    <li id="nav-favs-li" style="display:none;"><a href="/app/favourites" onclick="showFavourites();return false;">Favourites</a></li>
+    <li id="nav-creators-li" style="display:none;"><a href="/app/creators" onclick="showCreatorsPage();return false;" id="nav-creators-link">Become a Creator</a></li>
+    <li id="nav-wally-panel-li" style="display:none;"><a href="#" onclick="openWallyPanel();return false;">Wally Panel</a></li>
+    <li><a href="/app/wally" onclick="showWallyDirectory();return false;">Wally</a></li>
     <li><a href="#" onclick="showToast('Live Wallpapers coming soon!','success');return false;">Live Wallpaper</a></li>
   </ul>
   <div class="nav-actions" id="nav-actions">
-    <a class="btn btn-outline" href="#signin" onclick="showSignIn();return false;">Sign In</a>
-    <a class="btn btn-fill"    href="#signup" onclick="showSignUp();return false;">Sign Up</a>
+    <a class="btn btn-outline" href="/app/signin" onclick="showSignIn();return false;">Sign In</a>
+    <a class="btn btn-fill"    href="/app/signup" onclick="showSignUp();return false;">Sign Up</a>
   </div>
   <!-- Mobile hamburger -->
   <button class="nav-hamburger" id="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu" aria-expanded="false">
@@ -878,17 +909,17 @@ footer .logo{font-size:1.2rem;}
 <!-- Mobile drawer -->
 <div class="mobile-menu" id="mobile-menu">
   <div class="mobile-menu-inner">
-    <a class="mobile-menu-link" href="#gallery" onclick="goHome();closeMobileMenu();return false;">Home</a>
-    <a class="mobile-menu-link" href="#gallery" onclick="goHome();closeMobileMenu();return false;">Wallpapers</a>
-    <a class="mobile-menu-link" id="mob-favs-link" href="#favourites" onclick="showFavourites();closeMobileMenu();return false;" style="display:none;">Favourites</a>
-    <a class="mobile-menu-link" id="mob-creators-link" href="#creators" onclick="showCreatorsPage();closeMobileMenu();return false;" style="display:none;">Become a Creator</a>
-    <a class="mobile-menu-link" id="mob-wally-panel-link" href="#wally-panel" onclick="openWallyPanel();closeMobileMenu();return false;" style="display:none;">Wally Panel</a>
-    <a class="mobile-menu-link" href="#wally" onclick="showWallyDirectory();closeMobileMenu();return false;">Wally</a>
+    <a class="mobile-menu-link" href="/app" onclick="goHome();closeMobileMenu();return false;">Home</a>
+    <a class="mobile-menu-link" href="/app" onclick="goHome();closeMobileMenu();return false;">Wallpapers</a>
+    <a class="mobile-menu-link" id="mob-favs-link" href="/app/favourites" onclick="showFavourites();closeMobileMenu();return false;" style="display:none;">Favourites</a>
+    <a class="mobile-menu-link" id="mob-creators-link" href="/app/creators" onclick="showCreatorsPage();closeMobileMenu();return false;" style="display:none;">Become a Creator</a>
+    <a class="mobile-menu-link" id="mob-wally-panel-link" href="#" onclick="openWallyPanel();closeMobileMenu();return false;" style="display:none;">Wally Panel</a>
+    <a class="mobile-menu-link" href="/app/wally" onclick="showWallyDirectory();closeMobileMenu();return false;">Wally</a>
     <a class="mobile-menu-link" href="#" onclick="showToast('Live Wallpapers coming soon!','success');closeMobileMenu();return false;">Live Wallpaper</a>
     <div class="mobile-menu-divider"></div>
     <div class="mobile-menu-actions" id="mobile-nav-actions">
-      <a class="btn btn-outline" style="width:100%;text-align:center;" href="#signin" onclick="showSignIn();closeMobileMenu();return false;">Sign In</a>
-      <a class="btn btn-fill"    style="width:100%;text-align:center;display:block;margin-top:.5rem;" href="#signup" onclick="showSignUp();closeMobileMenu();return false;">Sign Up</a>
+      <a class="btn btn-outline" style="width:100%;text-align:center;" href="/app/signin" onclick="showSignIn();closeMobileMenu();return false;">Sign In</a>
+      <a class="btn btn-fill"    style="width:100%;text-align:center;display:block;margin-top:.5rem;" href="/app/signup" onclick="showSignUp();closeMobileMenu();return false;">Sign Up</a>
     </div>
   </div>
 </div>
@@ -958,66 +989,73 @@ footer .logo{font-size:1.2rem;}
   VIEW: SIGN IN
 ══════════════════════════════════════════ -->
 <div class="view" id="view-signin">
-  <div class="auth-page">
-    <!-- Left branding panel -->
-    <div class="auth-left">
-      <div class="auth-left-bg"></div>
-      <div class="auth-left-content">
-        <div class="auth-brand">Wall<span>Hive</span></div>
-        <div class="auth-brand-sub">For Your Every Background Need</div>
-      </div>
-      <div class="auth-left-quote">
-        <div class="auth-quote-text">Beautiful Walls.<br>Every Day.</div>
-        <div class="auth-quote-sub">Thousands of curated wallpapers, one account.</div>
-      </div>
-      <div class="auth-previews">
-        <div class="auth-preview-card"><img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=200&q=80" alt=""></div>
-        <div class="auth-preview-card"><img src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80" alt=""></div>
-        <div class="auth-preview-card"><img src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=200&q=80" alt=""></div>
-      </div>
+  <div class="auth-scene">
+    <div class="auth-mosaic" aria-hidden="true">
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1518623489648-a173ef7824f3?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1511300636408-a63a89df3482?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1511300636408-a63a89df3482?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1518623489648-a173ef7824f3?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=70')"></div>
     </div>
-    <!-- Right form panel -->
-    <div class="auth-right">
-      <div class="auth-form-wrap">
-        <div class="auth-form-title">Welcome Back</div>
-        <div class="auth-form-sub">Don't have an account? <a href="#signup" onclick="showSignUp();return false;" style="color:inherit;">Sign up free →</a></div>
+    <div class="auth-scrim"></div>
 
-        <!-- Google notice -->
-        <div class="google-config-notice" id="signin-google-notice">
-          <strong>Google Auth Setup Required</strong><br>
-          Replace <code>YOUR_GOOGLE_CLIENT_ID</code> in the script with your Google Cloud OAuth Client ID to enable Google Sign-In.
-        </div>
+    <div class="auth-card">
+      <a class="auth-card-brand" href="/app" onclick="goHome();return false;"><span class="brand-dot"></span>Wall<span>Hive</span></a>
 
-        <!-- Google Button (rendered by SDK) -->
-        <div style="display:flex;justify-content:center;margin-bottom:1.5rem;min-height:44px;">
-          <div id="g-signin-btn"></div>
-        </div>
-
-        <div class="auth-divider"><span>or sign in with email</span></div>
-
-        <!-- Email/password form -->
-        <div class="form-group">
-          <label class="form-label">Email Address</label>
-          <input class="form-input" type="email" id="si-email" placeholder="you@example.com" autocomplete="email">
-          <div class="form-error" id="si-email-err">Please enter a valid email.</div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <div class="form-input-wrap">
-            <input class="form-input" type="password" id="si-password" placeholder="••••••••" autocomplete="current-password">
-            <span class="input-icon" onclick="togglePw('si-password',this)">👁</span>
-          </div>
-          <div class="form-error" id="si-pass-err">Incorrect email or password.</div>
-        </div>
-        <div class="forgot-link"><a href="#" onclick="showForgot(event)">Forgot password?</a></div>
-        <button class="btn-auth" id="signin-btn" onclick="doSignIn()">
-          Sign In
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-        </button>
-        <div style="margin-top:1.5rem;text-align:center;">
-          <span style="font-size:.8rem;color:var(--muted);">Back to <a href="#gallery" onclick="goHome();return false;" style="color:var(--accent);cursor:pointer;text-decoration:none;">WallHive Gallery →</a></span>
-        </div>
+      <div class="auth-toggle-pill">
+        <a href="/app/signin" class="auth-toggle-opt active" onclick="showSignIn();return false;">Sign In</a>
+        <a href="/app/signup" class="auth-toggle-opt" onclick="showSignUp();return false;">Sign Up</a>
       </div>
+
+      <div class="auth-form-title">Welcome Back</div>
+      <div class="auth-form-sub">Sign in to keep browsing and downloading.</div>
+
+      <!-- Google notice -->
+      <div class="google-config-notice" id="signin-google-notice">
+        <strong>Google Auth Setup Required</strong><br>
+        Replace <code>YOUR_GOOGLE_CLIENT_ID</code> in the script with your Google Cloud OAuth Client ID to enable Google Sign-In.
+      </div>
+
+      <!-- Google Button (rendered by SDK) -->
+      <div style="display:flex;justify-content:center;margin-bottom:1.5rem;min-height:44px;">
+        <div id="g-signin-btn"></div>
+      </div>
+
+      <div class="auth-divider"><span>or sign in with email</span></div>
+
+      <!-- Email/password form -->
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input class="form-input" type="email" id="si-email" placeholder="you@example.com" autocomplete="email">
+        <div class="form-error" id="si-email-err">Please enter a valid email.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <div class="form-input-wrap">
+          <input class="form-input" type="password" id="si-password" placeholder="••••••••" autocomplete="current-password">
+          <span class="input-icon" onclick="togglePw('si-password',this)">👁</span>
+        </div>
+        <div class="form-error" id="si-pass-err">Incorrect email or password.</div>
+      </div>
+      <div class="forgot-link"><a href="#" onclick="showForgot(event)">Forgot password?</a></div>
+      <button class="btn-auth" id="signin-btn" onclick="doSignIn()">
+        Sign In
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <div class="auth-card-footer">Back to <a href="/app" onclick="goHome();return false;">WallHive Gallery →</a></div>
     </div>
   </div>
 </div>
@@ -1026,86 +1064,95 @@ footer .logo{font-size:1.2rem;}
   VIEW: SIGN UP
 ══════════════════════════════════════════ -->
 <div class="view" id="view-signup">
-  <div class="auth-page">
-    <div class="auth-left">
-      <div class="auth-left-bg" style="background-image:linear-gradient(135deg,rgba(0,0,0,.65) 0%,rgba(0,0,0,.2) 50%,rgba(0,0,0,.6) 100%),url('https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1200&q=85');"></div>
-      <div class="auth-left-content">
-        <div class="auth-brand">Wall<span>Hive</span></div>
-        <div class="auth-brand-sub">For Your Every Background Need</div>
-      </div>
-      <div class="auth-left-quote">
-        <div class="auth-quote-text">Join the<br>Community.</div>
-        <div class="auth-quote-sub">Save favourites, get personalised picks, access exclusive drops.</div>
-      </div>
-      <div class="auth-previews">
-        <div class="auth-preview-card"><img src="https://images.unsplash.com/photo-1511300636408-a63a89df3482?w=200&q=80" alt=""></div>
-        <div class="auth-preview-card"><img src="https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=200&q=80" alt=""></div>
-        <div class="auth-preview-card"><img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=200&q=80" alt=""></div>
-      </div>
+  <div class="auth-scene">
+    <div class="auth-mosaic" aria-hidden="true">
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1511300636408-a63a89df3482?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1518623489648-a173ef7824f3?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1518623489648-a173ef7824f3?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=70')"></div>
+      <div class="auth-tile" style="background-image:url('https://images.unsplash.com/photo-1511300636408-a63a89df3482?w=400&q=70')"></div>
     </div>
-    <div class="auth-right">
-      <div class="auth-form-wrap">
-        <div class="auth-form-title">Create Account</div>
-        <div class="auth-form-sub">Already have one? <a href="#signin" onclick="showSignIn();return false;" style="color:inherit;">Sign in →</a></div>
+    <div class="auth-scrim"></div>
 
-        <div class="google-config-notice" id="signup-google-notice">
-          <strong>Google Auth Setup Required</strong><br>
-          Replace <code>YOUR_GOOGLE_CLIENT_ID</code> with your Google Cloud OAuth Client ID to enable Google Sign-Up.
-        </div>
+    <div class="auth-card">
+      <a class="auth-card-brand" href="/app" onclick="goHome();return false;"><span class="brand-dot"></span>Wall<span>Hive</span></a>
 
-        <!-- Google Button (rendered by SDK) -->
-        <div style="display:flex;justify-content:center;margin-bottom:1.5rem;min-height:44px;">
-          <div id="g-signup-btn"></div>
-        </div>
+      <div class="auth-toggle-pill pos-right">
+        <a href="/app/signin" class="auth-toggle-opt" onclick="showSignIn();return false;">Sign In</a>
+        <a href="/app/signup" class="auth-toggle-opt active" onclick="showSignUp();return false;">Sign Up</a>
+      </div>
 
-        <div class="auth-divider"><span>or sign up with email</span></div>
+      <div class="auth-form-title">Join WallHive</div>
+      <div class="auth-form-sub">Free account — save favourites, download in full res.</div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">First Name</label>
-            <input class="form-input" type="text" id="su-fname" placeholder="Aryan" autocomplete="given-name">
-            <div class="form-error" id="su-fname-err">Required.</div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Last Name</label>
-            <input class="form-input" type="text" id="su-lname" placeholder="Sharma">
-          </div>
+      <div class="google-config-notice" id="signup-google-notice">
+        <strong>Google Auth Setup Required</strong><br>
+        Replace <code>YOUR_GOOGLE_CLIENT_ID</code> with your Google Cloud OAuth Client ID to enable Google Sign-Up.
+      </div>
+
+      <!-- Google Button (rendered by SDK) -->
+      <div style="display:flex;justify-content:center;margin-bottom:1.5rem;min-height:44px;">
+        <div id="g-signup-btn"></div>
+      </div>
+
+      <div class="auth-divider"><span>or sign up with email</span></div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">First Name</label>
+          <input class="form-input" type="text" id="su-fname" placeholder="Aryan" autocomplete="given-name">
+          <div class="form-error" id="su-fname-err">Required.</div>
         </div>
         <div class="form-group">
-          <label class="form-label">Email Address</label>
-          <input class="form-input" type="email" id="su-email" placeholder="you@example.com" autocomplete="email">
-          <div class="form-error" id="su-email-err">Please enter a valid email.</div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <div class="form-input-wrap">
-            <input class="form-input" type="password" id="su-password" placeholder="Min. 8 characters" oninput="checkStrength(this.value)" autocomplete="new-password">
-            <span class="input-icon" onclick="togglePw('su-password',this)">👁</span>
-          </div>
-          <div class="pw-strength" id="pw-strength">
-            <div class="pw-bars">
-              <div class="pw-bar" id="bar1"></div>
-              <div class="pw-bar" id="bar2"></div>
-              <div class="pw-bar" id="bar3"></div>
-              <div class="pw-bar" id="bar4"></div>
-            </div>
-            <div class="pw-label" id="pw-label">Enter a password</div>
-          </div>
-          <div class="form-error" id="su-pass-err">Password must be at least 8 characters.</div>
-        </div>
-        <div class="form-check">
-          <input type="checkbox" id="su-terms">
-          <label for="su-terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
-        </div>
-        <div class="form-error" id="su-terms-err" style="margin-top:-.6rem;margin-bottom:.8rem;">Please accept terms to continue.</div>
-        <button class="btn-auth" id="signup-btn" onclick="doSignUp()">
-          Create Account
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-        </button>
-        <div style="margin-top:1.4rem;text-align:center;">
-          <span style="font-size:.8rem;color:var(--muted);">Back to <a href="#gallery" onclick="goHome();return false;" style="color:var(--accent);cursor:pointer;text-decoration:none;">WallHive Gallery →</a></span>
+          <label class="form-label">Last Name</label>
+          <input class="form-input" type="text" id="su-lname" placeholder="Sharma">
         </div>
       </div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input class="form-input" type="email" id="su-email" placeholder="you@example.com" autocomplete="email">
+        <div class="form-error" id="su-email-err">Please enter a valid email.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <div class="form-input-wrap">
+          <input class="form-input" type="password" id="su-password" placeholder="Min. 8 characters" oninput="checkStrength(this.value)" autocomplete="new-password">
+          <span class="input-icon" onclick="togglePw('su-password',this)">👁</span>
+        </div>
+        <div class="pw-strength" id="pw-strength">
+          <div class="pw-bars">
+            <div class="pw-bar" id="bar1"></div>
+            <div class="pw-bar" id="bar2"></div>
+            <div class="pw-bar" id="bar3"></div>
+            <div class="pw-bar" id="bar4"></div>
+          </div>
+          <div class="pw-label" id="pw-label">Enter a password</div>
+        </div>
+        <div class="form-error" id="su-pass-err">Password must be at least 8 characters.</div>
+      </div>
+      <div class="form-check">
+        <input type="checkbox" id="su-terms">
+        <label for="su-terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+      </div>
+      <div class="form-error" id="su-terms-err" style="margin-top:-.6rem;margin-bottom:.8rem;">Please accept terms to continue.</div>
+      <button class="btn-auth" id="signup-btn" onclick="doSignUp()">
+        Create Account
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      </button>
+      <div class="auth-card-footer">Back to <a href="/app" onclick="goHome();return false;">WallHive Gallery →</a></div>
     </div>
   </div>
 </div>
@@ -1669,7 +1716,7 @@ footer .logo{font-size:1.2rem;}
 <div class="view" id="view-favourites">
   <nav style="position:sticky;top:0;z-index:200;padding:1.1rem 2.5rem;background:rgba(10,10,10,.9);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:1.5rem;">
     <div class="logo" onclick="goHome()" style="cursor:pointer;">WallHive<span style="color:var(--accent);">WallHive</span></div>
-    <a href="#gallery" onclick="goHome();return false;" style="color:var(--muted);font-size:.85rem;text-decoration:none;display:flex;align-items:center;gap:.4rem;">
+    <a href="/app" onclick="goHome();return false;" style="color:var(--muted);font-size:.85rem;text-decoration:none;display:flex;align-items:center;gap:.4rem;">
       ← Back to Gallery
     </a>
   </nav>
@@ -1696,7 +1743,7 @@ footer .logo{font-size:1.2rem;}
 <div class="view" id="view-wally-directory">
   <nav style="position:sticky;top:0;z-index:200;padding:1.1rem 2.5rem;background:rgba(10,10,10,.9);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:1.5rem;">
     <div class="logo" onclick="goHome()" style="cursor:pointer;">Wall<span>Hive</span></div>
-    <a href="#gallery" onclick="goHome();return false;" style="color:var(--muted);font-size:.85rem;text-decoration:none;display:flex;align-items:center;gap:.4rem;">
+    <a href="/app" onclick="goHome();return false;" style="color:var(--muted);font-size:.85rem;text-decoration:none;display:flex;align-items:center;gap:.4rem;">
       ← Back to Gallery
     </a>
   </nav>
@@ -1721,7 +1768,7 @@ footer .logo{font-size:1.2rem;}
 <div class="view" id="view-wally">
   <nav style="position:sticky;top:0;z-index:200;padding:1.1rem 2.5rem;background:rgba(10,10,10,.9);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:1.5rem;">
     <div class="logo" onclick="goHome()" style="cursor:pointer;">Wall<span>Hive</span></div>
-    <a href="#wally" onclick="showWallyDirectory();return false;" style="color:var(--muted);font-size:.85rem;text-decoration:none;display:flex;align-items:center;gap:.4rem;">
+    <a href="/app/wally" onclick="showWallyDirectory();return false;" style="color:var(--muted);font-size:.85rem;text-decoration:none;display:flex;align-items:center;gap:.4rem;">
       ← Back to Wally
     </a>
   </nav>
@@ -1755,7 +1802,7 @@ footer .logo{font-size:1.2rem;}
 <div class="view" id="view-creator-profile">
   <nav style="position:sticky;top:0;z-index:200;padding:1.1rem 2.5rem;background:rgba(10,10,10,.9);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:1.5rem;">
     <div class="logo" onclick="goHome()" style="cursor:pointer;">Wall<span>Hive</span></div>
-    <a href="#wally" onclick="showWallyDirectory();return false;" style="color:var(--muted);font-size:.85rem;text-decoration:none;display:flex;align-items:center;gap:.4rem;">
+    <a href="/app/wally" onclick="showWallyDirectory();return false;" style="color:var(--muted);font-size:.85rem;text-decoration:none;display:flex;align-items:center;gap:.4rem;">
       ← Back to Wally
     </a>
   </nav>
@@ -1788,7 +1835,7 @@ footer .logo{font-size:1.2rem;}
 <div class="view" id="view-creators">
   <nav style="position:sticky;top:0;z-index:200;padding:1.1rem 2.5rem;background:rgba(10,10,10,.9);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:1.5rem;">
     <div class="logo" onclick="goHome()" style="cursor:pointer;">Wall<span>Hive</span></div>
-    <a href="#gallery" onclick="goHome();return false;" style="color:var(--muted);font-size:.85rem;text-decoration:none;display:flex;align-items:center;gap:.4rem;">
+    <a href="/app" onclick="goHome();return false;" style="color:var(--muted);font-size:.85rem;text-decoration:none;display:flex;align-items:center;gap:.4rem;">
       ← Back to Gallery
     </a>
   </nav>
@@ -2103,7 +2150,7 @@ async function loadData() {
     _authGateActive = true;
     // Respect the visitor's intended entry point (e.g. the landing page's
     // "Sign Up" button links to /app#signup) instead of always forcing Sign In.
-    if (location.hash.toLowerCase() === '#signup') showSignUp();
+    if (location.pathname === '/app/signup') showSignUp();
     else showSignIn();
   } else {
     applyInitialHash();
@@ -2177,24 +2224,28 @@ async function saveUsers() {
 // VIEWS  +  HASH ROUTER
 // ──────────────────────────────────────────
 
-// Map between hash tokens and view ids
-const HASH_TO_VIEW = {
-  '':             'view-gallery',
-  '#':            'view-gallery',
-  '#gallery':     'view-gallery',
-  '#signin':      'view-signin',
-  '#signup':      'view-signup',
-  '#favourites':  'view-favourites',
-  '#wally':       'view-wally-directory',
-  '#creators':    'view-creators',
+// Map between URL paths (relative to the /app mount point) and view ids.
+// Everything here is a REAL server-routable path — no # fragments. Flask
+// serves index.html for every one of these paths (see app.py), so direct
+// navigation, refresh, and shared links all work without any client-side
+// redirect dance.
+const PATH_TO_VIEW = {
+  '/app':             'view-gallery',
+  '/app/':            'view-gallery',
+  '/app/gallery':     'view-gallery',
+  '/app/signin':      'view-signin',
+  '/app/signup':      'view-signup',
+  '/app/favourites':  'view-favourites',
+  '/app/wally':       'view-wally-directory',
+  '/app/creators':    'view-creators',
 };
-const VIEW_TO_HASH = {
-  'view-gallery':          '#gallery',
-  'view-signin':           '#signin',
-  'view-signup':           '#signup',
-  'view-favourites':       '#favourites',
-  'view-wally-directory':  '#wally',
-  'view-creators':         '#creators',
+const VIEW_TO_PATH = {
+  'view-gallery':          '/app',
+  'view-signin':           '/app/signin',
+  'view-signup':           '/app/signup',
+  'view-favourites':       '/app/favourites',
+  'view-wally-directory':  '/app/wally',
+  'view-creators':         '/app/creators',
 };
 
 /**
@@ -2203,7 +2254,7 @@ const VIEW_TO_HASH = {
  */
 function _activateView(id) {
   // Auth gate: an unauthenticated visitor can only ever land on sign-in/sign-up,
-  // regardless of what triggered navigation (nav link, hash edit, back/forward).
+  // regardless of what triggered navigation (nav link, path edit, back/forward).
   if (_authGateActive && id !== 'view-signin' && id !== 'view-signup') {
     id = 'view-signin';
   }
@@ -2214,48 +2265,48 @@ function _activateView(id) {
 }
 
 /**
- * Public: switch views AND update the URL hash.
+ * Public: switch views AND update the URL path.
  * Adds a history entry so back/forward work correctly.
  */
 function showView(id) {
   _activateView(id);
-  const hash = VIEW_TO_HASH[id] || '#gallery';
-  if (location.hash !== hash) {
-    history.pushState({ view: id }, '', hash);
+  const path = VIEW_TO_PATH[id] || '/app';
+  if (location.pathname !== path) {
+    history.pushState({ view: id }, '', path);
   }
 }
 
 /** Handle browser back / forward */
 window.addEventListener('popstate', function(e) {
-  const hash = location.hash.toLowerCase();
-  // Wall deep link e.g. #wall/d3
-  if (hash.startsWith('#wall/')) {
-    const wallId = location.hash.slice(6);
+  const path = location.pathname;
+  // Wall deep link e.g. /app/wall/d3
+  if (path.startsWith('/app/wall/')) {
+    const wallId = decodeURIComponent(path.slice('/app/wall/'.length));
     _activateView('view-gallery');
     renderGallery();
     if (wallpapers.some(w => w.id === wallId)) {
       setTimeout(() => openLightbox(wallId), 80);
     } else {
-      history.replaceState({ view: 'view-gallery' }, '', '#gallery');
+      history.replaceState({ view: 'view-gallery' }, '', '/app');
       showToast('That wallpaper link is no longer available.', 'error');
     }
     return;
   }
-  // Creator profile deep link e.g. #creator/e_abc123
-  if (hash.startsWith('#creator/')) {
-    const creatorId = location.hash.slice(9);
+  // Creator profile deep link e.g. /app/creator/e_abc123
+  if (path.startsWith('/app/creator/')) {
+    const creatorId = decodeURIComponent(path.slice('/app/creator/'.length));
     _cpCreatorId = creatorId;
     _activateView('view-creator-profile');
     loadCreatorProfileView(creatorId);
     return;
   }
   // Main Wally account profile deep link
-  if (hash === '#wally/main') {
+  if (path === '/app/wally/main') {
     _activateView('view-wally');
     loadWallyProfile();
     return;
   }
-  const id = (e.state && e.state.view) || HASH_TO_VIEW[hash] || 'view-gallery';
+  const id = (e.state && e.state.view) || PATH_TO_VIEW[path] || 'view-gallery';
   _activateView(id);
   if (id === 'view-gallery')          renderGallery();
   if (id === 'view-favourites')       renderFavourites();
@@ -2266,39 +2317,39 @@ window.addEventListener('popstate', function(e) {
   if (id === 'view-creators')         { if (!currentUser) { showSignIn(); } else { loadCreatorStatus(); } }
 });
 
-/** Read the URL hash on first load and show the right view */
+/** Read the URL path on first load and show the right view */
 function applyInitialHash() {
-  const hash = location.hash.toLowerCase();
+  const path = location.pathname;
   // Wall deep link — open gallery then lightbox (validate wall exists first)
-  if (hash.startsWith('#wall/')) {
-    const wallId = location.hash.slice(6);
+  if (path.startsWith('/app/wall/')) {
+    const wallId = decodeURIComponent(path.slice('/app/wall/'.length));
     _activateView('view-gallery');
     renderGallery();
     if (wallpapers.some(w => w.id === wallId)) {
-      history.replaceState({ view: 'view-gallery' }, '', location.hash);
+      history.replaceState({ view: 'view-gallery' }, '', path);
       setTimeout(() => openLightbox(wallId), 120);
     } else {
-      history.replaceState({ view: 'view-gallery' }, '', '#gallery');
+      history.replaceState({ view: 'view-gallery' }, '', '/app');
       showToast('That wallpaper link is no longer available.', 'error');
     }
     return;
   }
-  // Creator profile deep link e.g. #creator/e_abc123
-  if (hash.startsWith('#creator/')) {
-    const creatorId = location.hash.slice(9);
+  // Creator profile deep link e.g. /app/creator/e_abc123
+  if (path.startsWith('/app/creator/')) {
+    const creatorId = decodeURIComponent(path.slice('/app/creator/'.length));
     _cpCreatorId = creatorId;
     _activateView('view-creator-profile');
     loadCreatorProfileView(creatorId);
     return;
   }
   // Main Wally account profile deep link
-  if (hash === '#wally/main') {
+  if (path === '/app/wally/main') {
     _activateView('view-wally');
-    history.replaceState({ view: 'view-wally' }, '', '#wally/main');
+    history.replaceState({ view: 'view-wally' }, '', '/app/wally/main');
     loadWallyProfile();
     return;
   }
-  let id = HASH_TO_VIEW[hash] || 'view-gallery';
+  let id = PATH_TO_VIEW[path] || 'view-gallery';
   // If already logged in, bounce auth pages to gallery
   if (currentUser && (id === 'view-signin' || id === 'view-signup')) {
     id = 'view-gallery';
@@ -2312,7 +2363,7 @@ function applyInitialHash() {
     id = 'view-signin';
   }
   _activateView(id);
-  history.replaceState({ view: id }, '', VIEW_TO_HASH[id] || '#gallery');
+  history.replaceState({ view: id }, '', VIEW_TO_PATH[id] || '/app');
   if (id === 'view-gallery')          renderGallery();
   if (id === 'view-favourites')       renderFavourites();
   if (id === 'view-signin')           checkGoogleConfig('signin-google-notice');
@@ -2321,13 +2372,17 @@ function applyInitialHash() {
   if (id === 'view-creators')         loadCreatorStatus();
 }
 
-function goHome()          { _authGateActive = false; showView('view-gallery'); renderGallery(); }
+// goHome() is generic "navigate to gallery" — it's wired to the logo and every
+// "← Back to Gallery" link, including ones on the sign-in/sign-up pages themselves.
+// It must NOT clear the auth gate — only a genuine successful login/signup does that
+// (see the four call sites that set _authGateActive = false right before calling this).
+function goHome()          { if (_authGateActive) { showSignIn(); return; } showView('view-gallery'); renderGallery(); }
 function showSignIn()      { showView('view-signin');     checkGoogleConfig('signin-google-notice'); }
 function showSignUp()      { showView('view-signup');     checkGoogleConfig('signup-google-notice'); }
 function showFavourites()  { if (!currentUser) { showSignIn(); return; } showView('view-favourites'); renderFavourites(); }
 function showWallyProfile(){
   _activateView('view-wally');
-  if (location.hash !== '#wally/main') history.pushState({ view: 'view-wally' }, '', '#wally/main');
+  if (location.pathname !== '/app/wally/main') history.pushState({ view: 'view-wally' }, '', '/app/wally/main');
   loadWallyProfile();
 }
 function showWallyDirectory(){ showView('view-wally-directory'); loadWallyDirectory(); }
@@ -2383,11 +2438,11 @@ function setNavUser(user) {
       <button class="btn btn-outline" style="width:100%;margin-top:.5rem;" onclick="signOut();closeMobileMenu();">Sign Out</button>`;
   } else {
     actions.innerHTML = `
-      <a class="btn btn-outline" href="#signin" onclick="showSignIn();return false;">Sign In</a>
-      <a class="btn btn-fill"    href="#signup" onclick="showSignUp();return false;">Sign Up</a>`;
+      <a class="btn btn-outline" href="/app/signin" onclick="showSignIn();return false;">Sign In</a>
+      <a class="btn btn-fill"    href="/app/signup" onclick="showSignUp();return false;">Sign Up</a>`;
     if (mobActions) mobActions.innerHTML = `
-      <a class="btn btn-outline" style="width:100%;text-align:center;" href="#signin" onclick="showSignIn();closeMobileMenu();return false;">Sign In</a>
-      <a class="btn btn-fill"    style="width:100%;text-align:center;display:block;margin-top:.5rem;" href="#signup" onclick="showSignUp();closeMobileMenu();return false;">Sign Up</a>`;
+      <a class="btn btn-outline" style="width:100%;text-align:center;" href="/app/signin" onclick="showSignIn();closeMobileMenu();return false;">Sign In</a>
+      <a class="btn btn-fill"    style="width:100%;text-align:center;display:block;margin-top:.5rem;" href="/app/signup" onclick="showSignUp();closeMobileMenu();return false;">Sign Up</a>`;
   }
 }
 
@@ -2452,6 +2507,7 @@ async function handleGoogleCredential(response) {
       currentUser = users[idx > -1 ? idx : users.length - 1];
       localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
       setNavUser(currentUser);
+      _authGateActive = false;
       goHome();
       showToast(`Welcome, ${escapeHTML(currentUser.fname)}! 🎉`, 'success');
     } else {
@@ -2504,6 +2560,7 @@ async function doSignIn() {
 
     if (resp.ok && data.ok) {
       if (data.is_admin) {
+        _authGateActive = false;
         goHome();
         document.getElementById('admin-panel').classList.add('open');
         document.body.style.overflow = 'hidden';
@@ -2515,6 +2572,7 @@ async function doSignIn() {
         currentUser = data.user;
         localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
         setNavUser(currentUser);
+        _authGateActive = false;
         goHome();
         showToast(`Welcome back, ${data.user.fname}! 👋`, 'success');
       }
@@ -2665,6 +2723,7 @@ async function doVerifyOtp() {
       localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
       setNavUser(currentUser);
       closeOtpModal();
+      _authGateActive = false;
       goHome();
       pushActivity('signup', pendingSignup.fname + ' ' + pendingSignup.lname);
       showToast(`Account created! Welcome, ${pendingSignup.fname}! 🎉`, 'success');
@@ -2864,7 +2923,7 @@ function openLightbox(id) {
   _lbWallId = id;
 
   // Update URL hash without adding history for each wallpaper view
-  history.replaceState({ view: 'view-gallery' }, '', `#wall/${id}`);
+  history.replaceState({ view: 'view-gallery' }, '', `/app/wall/${id}`);
 
   // Image
   const img = document.getElementById('lb-img');
@@ -2930,7 +2989,7 @@ function openLightbox(id) {
 function closeLightbox() {
   document.getElementById('lightbox').classList.remove('open');
   // Restore gallery hash without the wall id
-  history.replaceState({ view: 'view-gallery' }, '', '#gallery');
+  history.replaceState({ view: 'view-gallery' }, '', '/app');
   _lbWallId = null;
 }
 document.getElementById('lightbox').addEventListener('click',e=>{if(e.target===document.getElementById('lightbox'))closeLightbox();});
@@ -2959,7 +3018,7 @@ function copyToClipboard(text) {
 function shareWall() {
   const w = wallpapers.find(x => x.id === _lbWallId);
   const title = w ? (w.title || w.tag || 'WallHive Wallpaper') : 'WallHive';
-  const shareUrl = location.origin + location.pathname + `#wall/${_lbWallId}`;
+  const shareUrl = location.origin + `/app/wall/${_lbWallId}`;
 
   const fallback = () => {
     copyToClipboard(shareUrl).then(ok => {
@@ -3274,7 +3333,7 @@ async function loadWallyDirectory() {
 function showCreatorProfile(id) {
   _cpCreatorId = id;
   _activateView('view-creator-profile');
-  history.pushState({ view: 'view-creator-profile', creatorId: id }, '', `#creator/${id}`);
+  history.pushState({ view: 'view-creator-profile', creatorId: id }, '', `/app/creator/${id}`);
   loadCreatorProfileView(id);
 }
 
