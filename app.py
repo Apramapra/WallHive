@@ -1859,6 +1859,8 @@ def landing():
     except Exception:
         return send_from_directory("templates", "landing.html")
 
+@app.route("/signin")
+@app.route("/signup")
 @app.route("/app")
 @app.route("/app/gallery")
 @app.route("/app/signin")
