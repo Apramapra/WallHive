@@ -1859,6 +1859,16 @@ def landing():
     except Exception:
         return send_from_directory("templates", "landing.html")
 
+@app.route("/terms")
+def terms_page():
+    """Public Terms of Service — no auth required, publicly linked from signup."""
+    return send_from_directory("templates", "terms.html")
+
+@app.route("/privacy")
+def privacy_page():
+    """Public Privacy Policy — no auth required, publicly linked from signup."""
+    return send_from_directory("templates", "privacy.html")
+
 @app.route("/signin")
 @app.route("/signup")
 @app.route("/app")
