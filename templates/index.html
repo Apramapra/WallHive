@@ -496,6 +496,7 @@ nav{
 .bulk-item-status.uploading{background:rgba(200,169,126,.15);color:var(--accent);}
 .bulk-item-status.done{background:rgba(60,200,100,.1);color:rgba(80,220,120,1);}
 .bulk-item-status.error{background:rgba(255,80,80,.1);color:rgba(255,130,130,1);}
+.bulk-item-status.duplicate{background:rgba(255,180,0,.12);color:rgba(255,195,80,1);}
 .bulk-progress{height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;width:100%;}
 .bulk-progress-bar{height:100%;background:var(--accent);border-radius:2px;transition:width .3s;width:0%;}
 .bulk-drop-zone{border:2px dashed rgba(232,213,163,.2);border-radius:12px;padding:30px 20px;text-align:center;cursor:pointer;position:relative;}
@@ -1970,6 +1971,35 @@ async function uploadToR2(file) {
 
   // Public URL = bucket public domain + key
   return `${R2_BUCKET_PUBLIC_URL.replace(/\/$/, '')}/${key}`;
+}
+
+// ── DUPLICATE-UPLOAD PREVENTION ────────────────────
+// Hashes a file's actual bytes (SHA-256, via the browser's built-in Web Crypto
+// API — no library needed). Used before an R2 upload, which goes straight from
+// the browser to the R2 worker and never passes through our backend, so the
+// backend can't hash it for us the way it does for GitHub/local uploads.
+async function hashFileSHA256(file) {
+  const buf = await file.arrayBuffer();
+  const digest = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Ask the backend whether this exact file has already been uploaded, BEFORE
+// spending R2 storage/bandwidth on it. Fails open (returns false) on a network
+// error — the UNIQUE index on wallpapers.content_hash is the real backstop that
+// can't be bypassed even if this pre-check is skipped or fails.
+async function checkDuplicateHash(hash) {
+  try {
+    const resp = await fetch('/api/check-duplicate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contentHash: hash }),
+    });
+    const data = await resp.json();
+    return !!(resp.ok && data.duplicate);
+  } catch (e) {
+    return false;
+  }
 }
 
 // ── CLIENT-SIDE THUMBNAIL GENERATOR ────────────────────
@@ -4051,13 +4081,29 @@ async function doWallyFileUpload() {
   const btn = document.getElementById('wc-btn-file-upload');
   btn.disabled = true;
 
-  let src = null, storedIn = null;
+  // Check for an exact duplicate BEFORE spending any upload bandwidth on it.
+  btn.textContent = '🔍 Checking…';
+  const fileHash = await hashFileSHA256(_wallyCreatorFile).catch(() => null);
+  if (fileHash && await checkDuplicateHash(fileHash)) {
+    showToast('This exact wallpaper has already been uploaded to WallHive.', 'error');
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg> Upload File';
+    return;
+  }
+
+  let src = null, storedIn = null, contentHash = fileHash;
   try {
     btn.textContent = '📤 Uploading to GitHub…';
     const fd = new FormData(); fd.append('file', _wallyCreatorFile);
     const ghResp = await fetch('/api/upload/github', { method: 'POST', body: fd });
+    if (ghResp.status === 409) {
+      showToast('This exact wallpaper has already been uploaded to WallHive.', 'error');
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg> Upload File';
+      return;
+    }
     const ghData = await ghResp.json();
-    if (ghResp.ok && ghData.ok && ghData.url) { src = ghData.url; storedIn = 'github'; }
+    if (ghResp.ok && ghData.ok && ghData.url) { src = ghData.url; storedIn = 'github'; if (ghData.contentHash) contentHash = ghData.contentHash; }
   } catch (e) { console.warn('[WallHive] Wally GitHub upload failed:', e); }
 
   if (!storedIn) {
@@ -4096,13 +4142,15 @@ async function doWallyFileUpload() {
     const resp = await fetch('/api/wallpapers', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ src, thumb, cat, tag, title: title || tag, desc, storedIn }),
+      body: JSON.stringify({ src, thumb, cat, tag, title: title || tag, desc, storedIn, contentHash }),
     });
     const data = await resp.json();
     if (resp.ok && data.ok) {
       wallpapers.unshift(data.wallpaper);
       renderGallery();
       showToast('✓ Wallpaper uploaded!', 'success');
+    } else if (resp.status === 409) {
+      showToast(data.error || 'This exact wallpaper has already been uploaded to WallHive.', 'error');
     } else {
       showToast(data.error || 'DB save failed.', 'error');
     }
@@ -4585,8 +4633,20 @@ async function doFileUpload() {
   const btn=document.getElementById('btn-file-upload'); btn.disabled=true;
   const tag=cat.charAt(0).toUpperCase()+cat.slice(1);
 
+  // Check for an exact duplicate BEFORE spending any upload bandwidth on it.
+  btn.textContent = '🔍 Checking…';
+  const fileHash = await hashFileSHA256(currentFile).catch(() => null);
+  if (fileHash && await checkDuplicateHash(fileHash)) {
+    showToast('This exact wallpaper has already been uploaded to WallHive.', 'error');
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg> Upload File';
+    return;
+  }
+
   let src = null;
   let storedIn = null; // 'github' | 'r2' | null
+  let contentHash = fileHash;
+  let blockedAsDuplicate = false;
 
   // ── Step 1: Server-side GitHub upload (token lives on server, works on ALL devices) ──
   try {
@@ -4594,17 +4654,29 @@ async function doFileUpload() {
     const fd = new FormData();
     fd.append('file', currentFile);
     const ghResp = await fetch('/api/upload/github', { method: 'POST', body: fd });
-    const ghData = await ghResp.json();
-    if (ghResp.ok && ghData.ok && ghData.url) {
-      src = ghData.url; storedIn = 'github';
-    } else if (ghResp.status === 503) {
-      console.info('[WallHive] Server-side GitHub not configured, trying R2…');
+    if (ghResp.status === 409) {
+      blockedAsDuplicate = true;
     } else {
-      console.warn('[WallHive] GitHub upload error:', ghData.error || ghResp.status);
-      showToast('GitHub upload failed — trying R2…', 'error');
+      const ghData = await ghResp.json();
+      if (ghResp.ok && ghData.ok && ghData.url) {
+        src = ghData.url; storedIn = 'github';
+        if (ghData.contentHash) contentHash = ghData.contentHash;
+      } else if (ghResp.status === 503) {
+        console.info('[WallHive] Server-side GitHub not configured, trying R2…');
+      } else {
+        console.warn('[WallHive] GitHub upload error:', ghData.error || ghResp.status);
+        showToast('GitHub upload failed — trying R2…', 'error');
+      }
     }
   } catch(e) {
     console.warn('[WallHive] GitHub upload network error:', e);
+  }
+
+  if (blockedAsDuplicate) {
+    showToast('This exact wallpaper has already been uploaded to WallHive.', 'error');
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg> Upload File';
+    return;
   }
 
   // ── Step 2: Fallback to R2 ──
@@ -4643,15 +4715,19 @@ async function doFileUpload() {
 
   // ── Step 3: Persist to SQLite — this is what EVERY device reads from ──
   btn.textContent = '🗄 Saving to DB…';
+  let dbSaveOk = false;
   try {
     const resp = await fetch('/api/wallpapers', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ src, thumb, cat, tag, title: title||tag, desc: description, storedIn }),
+      body: JSON.stringify({ src, thumb, cat, tag, title: title||tag, desc: description, storedIn, contentHash }),
     });
     const data = await resp.json();
     if (resp.ok && data.ok) {
       wallpapers.unshift(data.wallpaper);
+      dbSaveOk = true;
+    } else if (resp.status === 409) {
+      showToast(data.error || 'This exact wallpaper has already been uploaded to WallHive.', 'error');
     } else {
       showToast(data.error || 'DB save failed.', 'error');
     }
@@ -4670,10 +4746,15 @@ async function doFileUpload() {
   if(aiBadge) aiBadge.remove();
   btn.disabled=false; btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg> Upload File';
 
-  const successMsg = storedIn === 'github'
-    ? '✓ Uploaded to GitHub CDN — visible on all devices! 🚀'
-    : '✓ Uploaded to Cloudflare R2 — visible on all devices!';
-  pushActivity('upload', title||'File'); showToast(successMsg,'success');
+  // Only report success — and log activity — if the record actually made it into the DB.
+  // (Previously this ran unconditionally, which meant a failed or duplicate-rejected
+  // save would still show "✓ Uploaded" — fixed as part of adding duplicate detection.)
+  if (dbSaveOk) {
+    const successMsg = storedIn === 'github'
+      ? '✓ Uploaded to GitHub CDN — visible on all devices! 🚀'
+      : '✓ Uploaded to Cloudflare R2 — visible on all devices!';
+    pushActivity('upload', title||'File'); showToast(successMsg,'success');
+  }
 }
 
 function renderManageGrid() {
@@ -5618,22 +5699,35 @@ async function startBulkUpload() {
     _bulkSetStatus(i, 'uploading', 'Uploading...');
     _bulkSetPct(i, 20);
     try {
-      let src, thumb, storedIn = 'local';
+      // Check for an exact duplicate BEFORE spending upload bandwidth/AI-analysis on it.
+      _bulkSetStatus(i, 'uploading', 'Checking...');
+      const preHash = await hashFileSHA256(item.file).catch(() => null);
+      if (preHash && await checkDuplicateHash(preHash)) {
+        item.status = 'duplicate';
+        _bulkSetStatus(i, 'duplicate', '⚠ Duplicate — skipped');
+        continue;
+      }
+
+      let src, thumb, storedIn = 'local', contentHash = preHash, blockedAsDuplicate = false;
       if (store === 'github') {
         // Always go server-side so the token is never exposed in the browser
         const fd = new FormData();
         fd.append('file', item.file);
         const ghResp = await fetch('/api/upload/github', { method: 'POST', body: fd });
-        const ghData = await ghResp.json();
-        if (!ghResp.ok || !ghData.ok) throw new Error(ghData.error || 'GitHub upload failed');
-        src = ghData.url; thumb = src; storedIn = 'github';
-        try {
-          const thumbFile = await generateThumbnail(item.file);
-          const tfd = new FormData(); tfd.append('file', thumbFile);
-          const tResp = await fetch('/api/upload/github', { method: 'POST', body: tfd });
-          const tData = await tResp.json();
-          if (tResp.ok && tData.ok && tData.url) thumb = tData.url;
-        } catch (e) { console.warn('[WallHive] Bulk thumbnail (github) failed, using full image:', e); }
+        if (ghResp.status === 409) { blockedAsDuplicate = true; }
+        else {
+          const ghData = await ghResp.json();
+          if (!ghResp.ok || !ghData.ok) throw new Error(ghData.error || 'GitHub upload failed');
+          src = ghData.url; thumb = src; storedIn = 'github';
+          if (ghData.contentHash) contentHash = ghData.contentHash;
+          try {
+            const thumbFile = await generateThumbnail(item.file);
+            const tfd = new FormData(); tfd.append('file', thumbFile);
+            const tResp = await fetch('/api/upload/github', { method: 'POST', body: tfd });
+            const tData = await tResp.json();
+            if (tResp.ok && tData.ok && tData.url) thumb = tData.url;
+          } catch (e) { console.warn('[WallHive] Bulk thumbnail (github) failed, using full image:', e); }
+        }
       } else if (store === 'r2') {
         src = await uploadToR2(item.file);
         thumb = src; storedIn = 'r2';
@@ -5653,6 +5747,13 @@ async function startBulkUpload() {
           thumb = await generateThumbnailDataUrl(item.file);
         } catch (e) { console.warn('[WallHive] Bulk thumbnail (local) failed, using full image:', e); }
       }
+
+      if (blockedAsDuplicate) {
+        item.status = 'duplicate';
+        _bulkSetStatus(i, 'duplicate', '⚠ Duplicate — skipped');
+        continue;
+      }
+
       _bulkSetPct(i, 60);
       // AI vision analysis — get title, description, category
       let title, description, aiCat;
@@ -5685,11 +5786,18 @@ async function startBulkUpload() {
       const bResp = await fetch('/api/wallpapers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ src, thumb, cat: aiCat, tag: title, title, desc: description, storedIn }),
+        body: JSON.stringify({ src, thumb, cat: aiCat, tag: title, title, desc: description, storedIn, contentHash }),
       });
       const bData = await bResp.json();
       if (bResp.ok && bData.ok) {
         wallpapers.unshift(bData.wallpaper);
+      } else if (bResp.status === 409) {
+        // Duplicate caught by the DB's UNIQUE index at the last possible moment (a
+        // race with another upload). Do NOT fall back to a client-only phantom
+        // entry here — that would silently show "done" for a rejected duplicate.
+        item.status = 'duplicate';
+        _bulkSetStatus(i, 'duplicate', '⚠ Duplicate — skipped');
+        continue;
       } else {
         // Fallback: add client-side so UI still reflects it this session
         wallpapers.unshift({ id: 'f'+Date.now()+i, src, thumb, cat: aiCat, tag: title, title, description, isDefault: false, storedIn, downloadCount: 0, isFeatured: false });
@@ -5707,7 +5815,8 @@ async function startBulkUpload() {
   renderGallery(); renderManageGrid(); updateAdminStats();
   if (btn) btn.disabled = false;
   const doneCount = _bulkFiles.filter(function(b){return b.status==='done';}).length;
-  showToast('Bulk upload: ' + doneCount + '/' + _bulkFiles.length + ' done!', 'success');
+  const dupCount  = _bulkFiles.filter(function(b){return b.status==='duplicate';}).length;
+  showToast('Bulk upload: ' + doneCount + '/' + _bulkFiles.length + ' done' + (dupCount ? ', ' + dupCount + ' duplicate(s) skipped' : '') + '!', 'success');
   _bulkFiles = _bulkFiles.filter(function(b){return b.status !== 'done';});
   renderBulkQueue();
 }

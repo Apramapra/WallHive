@@ -41,7 +41,7 @@ POST /api/creators/<uid>/follow        (follow/unfollow a creator)
 GET  /
 """
 
-import os, json, base64, hashlib, hmac, secrets, time, sqlite3, threading, requests
+import os, json, base64, hashlib, hmac, secrets, time, sqlite3, threading, requests, re
 from functools import wraps
 from flask import Flask, request, jsonify, session, send_from_directory, make_response
 
@@ -309,12 +309,23 @@ def _init_db():
                 ("is_featured",    "INTEGER NOT NULL DEFAULT 0"),
                 ("uploader_id",    "TEXT"),
                 ("uploader_name",  "TEXT"),
+                ("content_hash",   "TEXT"),
             ]:
                 try:
                     conn.execute(f"ALTER TABLE wallpapers ADD COLUMN {_col} {_def}")
                     conn.commit()
                 except Exception:
                     pass  # column already exists — ignore
+            # Unique index so two wallpapers can never share a content_hash — this is
+            # the real backstop against duplicate uploads (a DB-level guarantee, not
+            # just an application-level check that a race condition could slip past).
+            # NULLs (wallpapers uploaded before this feature existed, or where hashing
+            # failed) are exempt from uniqueness in SQLite, which is what we want.
+            try:
+                conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_wallpapers_content_hash ON wallpapers(content_hash)")
+                conn.commit()
+            except Exception:
+                pass
             for _col, _def in [
                 ("is_creator", "INTEGER NOT NULL DEFAULT 0"),
             ]:
@@ -371,19 +382,35 @@ def db_get_wallpapers():
             conn.close()
 
 def db_add_wallpaper(wall_id, src, thumb, cat, tag, title, desc="", stored_in=None,
-                      uploader_id=None, uploader_name=None):
+                      uploader_id=None, uploader_name=None, content_hash=None):
     with _DB_LOCK:
         conn = _get_conn()
         try:
             now = int(time.time() * 1000)
             conn.execute(
                 "INSERT INTO wallpapers(id,src,thumb,cat,tag,title,description,is_default,stored_in,"
-                "created_at,uploader_id,uploader_name)"
-                " VALUES(?,?,?,?,?,?,?,0,?,?,?,?)",
+                "created_at,uploader_id,uploader_name,content_hash)"
+                " VALUES(?,?,?,?,?,?,?,0,?,?,?,?,?)",
                 (wall_id, src, thumb or src, cat, tag, title, desc, stored_in, now,
-                 uploader_id, uploader_name)
+                 uploader_id, uploader_name, content_hash)
             )
             conn.commit()
+        finally:
+            conn.close()
+
+def db_find_wallpaper_by_hash(content_hash):
+    """Look up an existing wallpaper by its content hash. Returns the matching
+    row (as a dict) or None. Used to reject exact-duplicate uploads."""
+    if not content_hash:
+        return None
+    with _DB_LOCK:
+        conn = _get_conn()
+        try:
+            row = conn.execute(
+                "SELECT id, title, tag FROM wallpapers WHERE content_hash = ? LIMIT 1",
+                (content_hash,)
+            ).fetchone()
+            return dict(row) if row else None
         finally:
             conn.close()
 
@@ -1194,18 +1221,83 @@ def api_add_wallpaper():
         uploader_id   = user.get("id")
         uploader_name = (user.get("fname") or "").strip() or "Wally"
 
-    db_add_wallpaper(
-        wall_id,
-        src       = data.get("src", ""),
-        thumb     = data.get("thumb") or data.get("src", ""),
-        cat       = cat,
-        tag       = data.get("tag") or cat.capitalize(),
-        title     = data.get("title", ""),
-        desc      = data.get("desc", ""),
-        stored_in = data.get("storedIn"),
-        uploader_id   = uploader_id,
-        uploader_name = uploader_name,
-    )
+    stored_in = data.get("storedIn")
+    src       = data.get("src", "")
+
+    # Exact-duplicate check. For 'local' (base64-in-DB) storage we hash the actual
+    # decoded bytes ourselves — fully server-side, nothing to trust from the client.
+    # For 'github'/'r2' storage, the file bytes never reach this endpoint (only a
+    # URL does) — the hash was already computed server-side back in api_upload_github
+    # / api_upload_r2 and relayed through the client in between, which is why we
+    # only accept it if it actually looks like a sha256 hex digest.
+    content_hash = None
+    if stored_in == "local" and src.startswith("data:"):
+        try:
+            _, b64_payload = src.split(",", 1)
+            content_hash = hashlib.sha256(base64.b64decode(b64_payload, validate=True)).hexdigest()
+        except Exception:
+            content_hash = None
+    else:
+        candidate = data.get("contentHash")
+        if isinstance(candidate, str) and re.fullmatch(r"[0-9a-f]{64}", candidate):
+            content_hash = candidate
+
+    # URL-paste path (storedIn is null/absent — no file ever passed through
+    # api_upload_github/r2, so there's no hash yet). Best-effort: fetch the
+    # image ourselves and hash it, so a pasted URL pointing at content that's
+    # already on WallHive still gets caught. This is intentionally forgiving —
+    # if the fetch fails, times out, or the URL isn't reachable, we do NOT
+    # block the upload over it; we just proceed without duplicate protection
+    # for that one item, same as any other best-effort check in this codebase.
+    if content_hash is None and not stored_in and src.startswith(("http://", "https://")):
+        try:
+            r = _http.get(src, timeout=8, stream=True)
+            if r.ok:
+                chunks = []
+                total = 0
+                for chunk in r.iter_content(chunk_size=65536):
+                    total += len(chunk)
+                    if total > MAX_PORTFOLIO_IMAGE_BYTES:
+                        chunks = None
+                        break
+                    chunks.append(chunk)
+                if chunks:
+                    raw = b"".join(chunks)
+                    if _sniff_image_bytes(raw):
+                        content_hash = hashlib.sha256(raw).hexdigest()
+            r.close()
+        except Exception:
+            pass  # fetch failed — proceed without a hash for this one item
+
+    existing = db_find_wallpaper_by_hash(content_hash)
+    if existing:
+        return jsonify({
+            "error": "This exact wallpaper has already been uploaded to WallHive.",
+            "duplicate": True,
+        }), 409
+
+    try:
+        db_add_wallpaper(
+            wall_id,
+            src       = src,
+            thumb     = data.get("thumb") or src,
+            cat       = cat,
+            tag       = data.get("tag") or cat.capitalize(),
+            title     = data.get("title", ""),
+            desc      = data.get("desc", ""),
+            stored_in = stored_in,
+            uploader_id   = uploader_id,
+            uploader_name = uploader_name,
+            content_hash  = content_hash,
+        )
+    except sqlite3.IntegrityError:
+        # Two uploads of the exact same file landed in the same instant — the
+        # UNIQUE index on content_hash caught what the check above just missed.
+        return jsonify({
+            "error": "This exact wallpaper has already been uploaded to WallHive.",
+            "duplicate": True,
+        }), 409
+
     walls = db_get_wallpapers()
     wall  = next((w for w in walls if w["id"] == wall_id), None)
     return jsonify({"ok": True, "wallpaper": wall})
@@ -1347,6 +1439,23 @@ def _decode_portfolio_image(data_url: str):
         return False, "File content doesn't match a supported image format", None
     return True, data_url, mime
 
+@app.route("/api/check-duplicate", methods=["POST"])
+@creator_or_admin_required
+def api_check_duplicate():
+    """Used by the R2 upload path, which uploads directly from the browser to
+    the R2 worker and never passes the file through this backend. The client
+    hashes the file itself (Web Crypto, same SHA-256 algorithm used server-side
+    for the GitHub/local paths) and asks us to check it BEFORE spending R2
+    storage/bandwidth on a file we'd reject anyway. This is a convenience
+    pre-check only — the real, unavoidable enforcement is the UNIQUE index on
+    wallpapers.content_hash, checked again when the record is actually created."""
+    data = request.json or {}
+    content_hash = data.get("contentHash", "")
+    if not isinstance(content_hash, str) or not re.fullmatch(r"[0-9a-f]{64}", content_hash):
+        return jsonify({"error": "Invalid content hash"}), 400
+    existing = db_find_wallpaper_by_hash(content_hash)
+    return jsonify({"ok": True, "duplicate": bool(existing)})
+
 @app.route("/api/upload/github", methods=["POST"])
 @creator_or_admin_required
 def api_upload_github():
@@ -1357,11 +1466,24 @@ def api_upload_github():
         return jsonify({"error": "No file provided"}), 400
     if not _is_valid_image(file):
         return jsonify({"error": "Invalid file type — only JPG, PNG, WebP, GIF allowed"}), 400
+    raw_bytes = file.read()
+    file.seek(0)
+    # Exact-duplicate check: hash the actual pixel/file bytes and reject if a
+    # wallpaper with this exact content already exists anywhere on WallHive.
+    # This is a real, byte-for-byte comparison — a re-saved, re-compressed, or
+    # cropped copy will NOT match (a different hash), only a truly identical file.
+    content_hash = hashlib.sha256(raw_bytes).hexdigest()
+    existing = db_find_wallpaper_by_hash(content_hash)
+    if existing:
+        return jsonify({
+            "error": "This exact wallpaper has already been uploaded to WallHive.",
+            "duplicate": True,
+        }), 409
     ext  = (file.filename or "img.jpg").rsplit(".", 1)[-1].lower()
     name = f"{int(time.time()*1000)}-{secrets.token_hex(4)}.{ext}"
     path = f"{GITHUB_FOLDER}/{name}"
     api_url = f"https://api.github.com/repos/{GITHUB_USER}/{GITHUB_REPO}/contents/{path}"
-    b64  = base64.b64encode(file.read()).decode()
+    b64  = base64.b64encode(raw_bytes).decode()
     resp = _http.put(api_url, json={
         "message": f"Upload wallpaper: {name}",
         "branch": GITHUB_BRANCH,
@@ -1374,7 +1496,7 @@ def api_upload_github():
     if not resp.ok:
         return jsonify({"error": f"GitHub error {resp.status_code}"}), 502
     cdn_url = f"https://cdn.jsdelivr.net/gh/{GITHUB_USER}/{GITHUB_REPO}@{GITHUB_BRANCH}/{path}"
-    return jsonify({"ok": True, "url": cdn_url})
+    return jsonify({"ok": True, "url": cdn_url, "contentHash": content_hash})
 
 
 @app.route("/api/delete/github", methods=["DELETE"])
@@ -1419,17 +1541,27 @@ def api_upload_r2():
         return jsonify({"error": "No file"}), 400
     if not _is_valid_image(file):
         return jsonify({"error": "Invalid file type — only JPG, PNG, WebP, GIF allowed"}), 400
+    raw_bytes = file.read()
+    file.seek(0)
+    # Exact-duplicate check — see the matching comment in api_upload_github.
+    content_hash = hashlib.sha256(raw_bytes).hexdigest()
+    existing = db_find_wallpaper_by_hash(content_hash)
+    if existing:
+        return jsonify({
+            "error": "This exact wallpaper has already been uploaded to WallHive.",
+            "duplicate": True,
+        }), 409
     ext      = (file.filename or "img.jpg").rsplit(".", 1)[-1].lower()
     key      = f"velvetsky/{int(time.time()*1000)}-{secrets.token_hex(4)}.{ext}"
     endpoint = f"{R2_WORKER_URL}/upload/{requests.utils.quote(key, safe='')}"
     headers  = {"Content-Type": file.content_type or "image/jpeg"}
     if R2_AUTH_TOKEN:
         headers["Authorization"] = f"Bearer {R2_AUTH_TOKEN}"
-    resp = _http.put(endpoint, data=file.read(), headers=headers, timeout=30)
+    resp = _http.put(endpoint, data=raw_bytes, headers=headers, timeout=30)
     if not resp.ok:
         return jsonify({"error": f"R2 error {resp.status_code}"}), 502
     public_url = f"{R2_BUCKET_PUBLIC_URL.rstrip('/')}/{key}"
-    return jsonify({"ok": True, "url": public_url})
+    return jsonify({"ok": True, "url": public_url, "contentHash": content_hash})
 
 
 @app.route("/api/delete/r2", methods=["DELETE"])
