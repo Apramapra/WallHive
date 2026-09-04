@@ -328,12 +328,22 @@ def _init_db():
                 pass
             for _col, _def in [
                 ("is_creator", "INTEGER NOT NULL DEFAULT 0"),
+                ("username",   "TEXT"),
+                ("bio",        "TEXT"),
             ]:
                 try:
                     conn.execute(f"ALTER TABLE users ADD COLUMN {_col} {_def}")
                     conn.commit()
                 except Exception:
                     pass  # column already exists — ignore
+            # Unique index on username, case-insensitive (COLLATE NOCASE) so "Sam"
+            # and "sam" can't both be taken. NULLs (every existing user, until they
+            # set one) are exempt from uniqueness in SQLite, same pattern as above.
+            try:
+                conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username COLLATE NOCASE)")
+                conn.commit()
+            except Exception:
+                pass
         finally:
             conn.close()
 
@@ -365,6 +375,9 @@ def _row_to_user(row, include_hash=False):
         "createdAt": row["created_at"],
         "favs": json.loads(row["favs"] or "[]"),
         "isCreator": bool(row["is_creator"]) if "is_creator" in keys else False,
+        "username": (row["username"] if "username" in keys else None) or "",
+        "bio": (row["bio"] if "bio" in keys else None) or "",
+        "hasPassword": bool(row["password_hash"]) if "password_hash" in keys else False,
     }
     if include_hash:
         d["passwordHash"] = row["password_hash"]
@@ -1177,6 +1190,178 @@ def api_me():
         "is_admin": session.get("is_admin", False),
         "creatorApplicationStatus": application_status,
     })
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Account management — password, username, avatar, creator bio
+# ──────────────────────────────────────────────────────────────────────────────
+USERNAME_RE = re.compile(r"^[a-zA-Z0-9_]{3,20}$")
+
+@app.route("/api/account/password", methods=["POST"])
+@login_required
+def api_account_password():
+    data = request.json or {}
+    new_password = data.get("newPassword", "")
+    current_password = data.get("currentPassword", "")
+
+    if not isinstance(new_password, str) or len(new_password) < 8:
+        return jsonify({"error": "New password must be at least 8 characters."}), 400
+
+    uid = session["user"].get("id")
+    row = db_find_user_by_id(uid)
+    if not row:
+        return jsonify({"error": "Account not found."}), 404
+
+    existing_hash = row["password_hash"]
+    if existing_hash:
+        # Normal case: they already have a password (email/password account,
+        # or a Google account that previously set one) — must prove they know it.
+        if not verify_pass(current_password, existing_hash):
+            return jsonify({"error": "Current password is incorrect."}), 403
+    # else: Google-only account setting a password for the first time — no
+    # current password to verify, since one was never set.
+
+    new_hash = hash_pass(new_password)
+    with _DB_LOCK:
+        conn = _get_conn()
+        try:
+            conn.execute("UPDATE users SET password_hash=? WHERE id=?", (new_hash, uid))
+            conn.commit()
+        finally:
+            conn.close()
+    return jsonify({"ok": True})
+
+
+@app.route("/api/account/username", methods=["POST"])
+@login_required
+def api_account_username():
+    data = request.json or {}
+    username = (data.get("username") or "").strip()
+    if not USERNAME_RE.match(username):
+        return jsonify({"error": "Username must be 3-20 characters: letters, numbers, and underscores only."}), 400
+
+    uid = session["user"].get("id")
+    try:
+        with _DB_LOCK:
+            conn = _get_conn()
+            try:
+                conn.execute("UPDATE users SET username=? WHERE id=?", (username, uid))
+                conn.commit()
+            finally:
+                conn.close()
+    except sqlite3.IntegrityError:
+        return jsonify({"error": "That username is already taken."}), 409
+
+    row = db_find_user_by_id(uid)
+    user = _row_to_user(row)
+    session["user"] = user
+    return jsonify({"ok": True, "user": user})
+
+
+@app.route("/api/account/bio", methods=["POST"])
+@login_required
+def api_account_bio():
+    if not _session_is_creator():
+        return jsonify({"error": "Only approved Wally creators can set a bio."}), 403
+    data = request.json or {}
+    bio = (data.get("bio") or "").strip()[:280]
+
+    uid = session["user"].get("id")
+    with _DB_LOCK:
+        conn = _get_conn()
+        try:
+            conn.execute("UPDATE users SET bio=? WHERE id=?", (bio, uid))
+            conn.commit()
+        finally:
+            conn.close()
+
+    row = db_find_user_by_id(uid)
+    user = _row_to_user(row)
+    session["user"] = user
+    return jsonify({"ok": True, "user": user})
+
+
+@app.route("/api/account/picture", methods=["POST"])
+@login_required
+def api_account_picture():
+    """Saves a picture URL that was already uploaded via /api/upload/avatar
+    (or /api/upload/github, /api/upload/r2) — this endpoint itself does no
+    uploading, just records the URL against the account."""
+    data = request.json or {}
+    url = (data.get("picture") or "").strip()
+    if not url or not url.startswith(("http://", "https://")):
+        return jsonify({"error": "Invalid picture URL."}), 400
+
+    uid = session["user"].get("id")
+    with _DB_LOCK:
+        conn = _get_conn()
+        try:
+            conn.execute("UPDATE users SET picture=? WHERE id=?", (url, uid))
+            conn.commit()
+        finally:
+            conn.close()
+
+    row = db_find_user_by_id(uid)
+    user = _row_to_user(row)
+    session["user"] = user
+    return jsonify({"ok": True, "user": user})
+
+
+@app.route("/api/upload/avatar", methods=["POST"])
+@login_required
+def api_upload_avatar():
+    """Like api_upload_github/api_upload_r2, but available to EVERY signed-in
+    user, not just approved creators — a profile picture isn't gallery content
+    and shouldn't require creator approval. Uploads into a separate 'avatars/'
+    path so profile pictures and wallpapers never collide in storage."""
+    file = request.files.get("file")
+    if not file:
+        return jsonify({"error": "No file provided"}), 400
+    if not _is_valid_image(file):
+        return jsonify({"error": "Invalid file type — only JPG, PNG, WebP, GIF allowed"}), 400
+
+    # Avatars are small — cap well below the general wallpaper upload limit.
+    file.seek(0, os.SEEK_END)
+    size = file.tell()
+    file.seek(0)
+    if size > 5 * 1024 * 1024:
+        return jsonify({"error": "Profile pictures must be under 5MB."}), 400
+
+    ext = (file.filename or "avatar.jpg").rsplit(".", 1)[-1].lower()
+    uid = session["user"].get("id")
+    name = f"{uid}-{int(time.time()*1000)}-{secrets.token_hex(4)}.{ext}"
+
+    if GITHUB_TOKEN and GITHUB_USER and GITHUB_REPO:
+        path = f"avatars/{name}"
+        api_url = f"https://api.github.com/repos/{GITHUB_USER}/{GITHUB_REPO}/contents/{path}"
+        b64 = base64.b64encode(file.read()).decode()
+        resp = _http.put(api_url, json={
+            "message": f"Upload avatar: {name}",
+            "branch": GITHUB_BRANCH,
+            "content": b64,
+        }, headers={
+            "Authorization": f"Bearer {GITHUB_TOKEN}",
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+        }, timeout=30)
+        if resp.ok:
+            cdn_url = f"https://cdn.jsdelivr.net/gh/{GITHUB_USER}/{GITHUB_REPO}@{GITHUB_BRANCH}/{path}"
+            return jsonify({"ok": True, "url": cdn_url})
+        return jsonify({"error": f"GitHub error {resp.status_code}"}), 502
+
+    if R2_WORKER_URL:
+        key = f"avatars/{name}"
+        endpoint = f"{R2_WORKER_URL}/upload/{requests.utils.quote(key, safe='')}"
+        headers = {"Content-Type": file.content_type or "image/jpeg"}
+        if R2_AUTH_TOKEN:
+            headers["Authorization"] = f"Bearer {R2_AUTH_TOKEN}"
+        resp = _http.put(endpoint, data=file.read(), headers=headers, timeout=30)
+        if resp.ok:
+            public_url = f"{R2_BUCKET_PUBLIC_URL.rstrip('/')}/{key}"
+            return jsonify({"ok": True, "url": public_url})
+        return jsonify({"error": f"R2 error {resp.status_code}"}), 502
+
+    return jsonify({"error": "No image storage configured on server"}), 503
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -2011,6 +2196,7 @@ def privacy_page():
 @app.route("/app/wally")
 @app.route("/app/wally/main")
 @app.route("/app/creators")
+@app.route("/app/account")
 @app.route("/app/wall/<wall_id>")
 @app.route("/app/creator/<uid>")
 def index(wall_id=None, uid=None):

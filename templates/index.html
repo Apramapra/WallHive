@@ -378,6 +378,10 @@ nav{
 /* Form fields */
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .form-group{margin-bottom:1rem;}
+
+/* Account settings page */
+.acc-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem 1.6rem;margin-bottom:1.1rem;}
+.acc-card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;color:var(--text);margin-bottom:1rem;}
 .form-label{display:block;font-size:.72rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem;}
 .form-input-wrap{position:relative;}
 .form-input{width:100%;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px 16px;font-family:'DM Sans',sans-serif;font-size:.95rem;color:var(--text);outline:none;transition:border-color .2s,background .2s,box-shadow .2s;}
@@ -1741,6 +1745,103 @@ footer .logo{font-size:1.2rem;}
 </div>
 
 <!-- ══════════════════════════════════════════
+  VIEW: ACCOUNT SETTINGS
+══════════════════════════════════════════ -->
+<div class="view" id="view-account">
+  <nav style="position:sticky;top:0;z-index:200;padding:1.1rem 2.5rem;background:rgba(10,10,10,.9);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:1.5rem;">
+    <div class="logo" onclick="goHome()" style="cursor:pointer;">Wall<span>Hive</span></div>
+    <a href="/app" onclick="goHome();return false;" style="color:var(--muted);font-size:.85rem;text-decoration:none;display:flex;align-items:center;gap:.4rem;">
+      ← Back to Gallery
+    </a>
+  </nav>
+  <div style="padding:3rem 2.5rem 80px;max-width:640px;margin:0 auto;">
+    <div style="margin-bottom:2.2rem;">
+      <h2 style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.8rem;color:var(--text);">Account Settings</h2>
+      <p style="color:var(--muted);font-size:.9rem;margin-top:.4rem;">Manage your profile, username, and password.</p>
+    </div>
+
+    <!-- Profile picture -->
+    <div class="acc-card">
+      <div class="acc-card-title">Profile Picture</div>
+      <div style="display:flex;align-items:center;gap:1.2rem;">
+        <img id="acc-avatar-preview" src="" alt="" style="width:72px;height:72px;border-radius:50%;object-fit:cover;background:var(--card);border:1px solid var(--border);">
+        <div>
+          <input type="file" id="acc-avatar-input" accept="image/*" style="display:none;" onchange="doUploadAvatar(this.files[0])">
+          <button class="btn btn-outline" style="padding:.55rem 1.2rem;font-size:.85rem;" onclick="document.getElementById('acc-avatar-input').click()">Change Photo</button>
+          <div style="font-size:.76rem;color:var(--muted);margin-top:.5rem;">JPG, PNG, WebP, or GIF. Max 5MB.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Username -->
+    <div class="acc-card">
+      <div class="acc-card-title">Username</div>
+      <div class="form-group" style="margin-bottom:.6rem;">
+        <input class="form-input" type="text" id="acc-username" placeholder="e.g. aryan_wanders" maxlength="20">
+        <div class="form-error" id="acc-username-err"></div>
+        <div class="form-hint">3-20 characters — letters, numbers, and underscores only.</div>
+      </div>
+      <button class="btn btn-outline" id="acc-username-btn" style="padding:.6rem 1.3rem;font-size:.85rem;" onclick="doChangeUsername()">Save Username</button>
+    </div>
+
+    <!-- Email (read-only) -->
+    <div class="acc-card">
+      <div class="acc-card-title">Email</div>
+      <input class="form-input" type="email" id="acc-email" disabled style="opacity:.65;cursor:not-allowed;">
+      <div class="form-hint">Your email is your sign-in identifier and can't be changed here.</div>
+    </div>
+
+    <!-- Password -->
+    <div class="acc-card">
+      <div class="acc-card-title" id="acc-pw-title">Change Password</div>
+      <div class="form-group" id="acc-current-pw-group">
+        <label class="form-label">Current Password</label>
+        <div class="form-input-wrap">
+          <input class="form-input" type="password" id="acc-current-pw" placeholder="••••••••" autocomplete="current-password">
+          <span class="input-icon" onclick="togglePw('acc-current-pw',this)">👁</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">New Password</label>
+        <div class="form-input-wrap">
+          <input class="form-input" type="password" id="acc-new-pw" placeholder="Min. 8 characters" autocomplete="new-password">
+          <span class="input-icon" onclick="togglePw('acc-new-pw',this)">👁</span>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:.6rem;">
+        <label class="form-label">Confirm New Password</label>
+        <div class="form-input-wrap">
+          <input class="form-input" type="password" id="acc-confirm-pw" placeholder="Re-enter new password" autocomplete="new-password">
+          <span class="input-icon" onclick="togglePw('acc-confirm-pw',this)">👁</span>
+        </div>
+        <div class="form-error" id="acc-pw-err"></div>
+      </div>
+      <button class="btn btn-outline" id="acc-pw-btn" style="padding:.6rem 1.3rem;font-size:.85rem;" onclick="doChangePassword()">Update Password</button>
+    </div>
+
+    <!-- Wally Creator settings — only shown for approved creators -->
+    <div class="acc-card" id="acc-creator-section" style="display:none;">
+      <div class="acc-card-title">🐝 Wally Creator Settings</div>
+      <div class="form-group" style="margin-bottom:.6rem;">
+        <label class="form-label">Creator Bio</label>
+        <textarea class="form-input" id="acc-bio" rows="3" maxlength="280" placeholder="Tell people what you make…" style="resize:vertical;font-family:'DM Sans',sans-serif;"></textarea>
+        <div class="form-error" id="acc-bio-err"></div>
+        <div class="form-hint"><span id="acc-bio-count">0</span>/280 — shown on your public Wally profile.</div>
+      </div>
+      <button class="btn btn-outline" id="acc-bio-btn" style="padding:.6rem 1.3rem;font-size:.85rem;margin-bottom:.9rem;" onclick="doChangeBio()">Save Bio</button>
+      <div style="border-top:1px solid var(--border);padding-top:1rem;">
+        <button class="btn btn-fill" style="padding:.6rem 1.3rem;font-size:.85rem;" onclick="openWallyPanel()">Open Wally Creator Panel →</button>
+      </div>
+    </div>
+
+  </div>
+  <footer style="border-top:1px solid var(--border);padding:2rem 2.5rem;display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:.8rem;">
+    <div class="logo" style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;">Wall<span style="color:var(--accent);">Hive</span></div>
+    <span>© 2026 WallHive</span>
+  </footer>
+</div>
+
+<!-- ══════════════════════════════════════════
   VIEW: WALLY DIRECTORY — all publishers on WallHive are called "Wally"
 ══════════════════════════════════════════ -->
 <div class="view" id="view-wally-directory">
@@ -2273,6 +2374,7 @@ const PATH_TO_VIEW = {
   '/app/favourites':  'view-favourites',
   '/app/wally':       'view-wally-directory',
   '/app/creators':    'view-creators',
+  '/app/account':     'view-account',
 };
 const VIEW_TO_PATH = {
   'view-gallery':          '/app',
@@ -2281,6 +2383,7 @@ const VIEW_TO_PATH = {
   'view-favourites':       '/app/favourites',
   'view-wally-directory':  '/app/wally',
   'view-creators':         '/app/creators',
+  'view-account':          '/app/account',
 };
 
 /**
@@ -2350,6 +2453,7 @@ window.addEventListener('popstate', function(e) {
   if (id === 'view-wally-directory')  loadWallyDirectory();
   if (id === 'view-wally')            loadWallyProfile();
   if (id === 'view-creators')         { if (!currentUser) { showSignIn(); } else { loadCreatorStatus(); } }
+  if (id === 'view-account')          { if (!currentUser) { showSignIn(); } else { renderAccountView(); } }
 });
 
 /** Read the URL path on first load and show the right view */
@@ -2397,6 +2501,10 @@ function applyInitialHash() {
   if (!currentUser && id === 'view-creators') {
     id = 'view-signin';
   }
+  // Account settings requires login
+  if (!currentUser && id === 'view-account') {
+    id = 'view-signin';
+  }
   _activateView(id);
   history.replaceState({ view: id }, '', VIEW_TO_PATH[id] || '/app');
   if (id === 'view-gallery')          renderGallery();
@@ -2405,6 +2513,7 @@ function applyInitialHash() {
   if (id === 'view-signup')           checkGoogleConfig('signup-google-notice');
   if (id === 'view-wally-directory')  loadWallyDirectory();
   if (id === 'view-creators')         loadCreatorStatus();
+  if (id === 'view-account')          renderAccountView();
 }
 
 // goHome() is generic "navigate to gallery" — it's wired to the logo and every
@@ -2422,6 +2531,201 @@ function showWallyProfile(){
 }
 function showWallyDirectory(){ showView('view-wally-directory'); loadWallyDirectory(); }
 function showCreatorsPage(){ if (!currentUser) { showSignIn(); return; } showView('view-creators'); loadCreatorStatus(); }
+function showAccount(){ if (!currentUser) { showSignIn(); return; } showView('view-account'); renderAccountView(); }
+
+// ── ACCOUNT SETTINGS ────────────────────────────────
+function renderAccountView() {
+  if (!currentUser) return;
+  const initials = escapeHTML(((currentUser.fname||'?')[0]+(currentUser.lname||'')[0]||'').toUpperCase());
+  const avatarImg = document.getElementById('acc-avatar-preview');
+  if (currentUser.picture) {
+    avatarImg.src = currentUser.picture;
+    avatarImg.style.display = '';
+    avatarImg.onerror = () => { avatarImg.style.display = 'none'; };
+  } else {
+    // No picture set — show initials instead of a broken/empty image
+    avatarImg.style.display = 'none';
+  }
+  const avatarWrap = avatarImg.parentElement;
+  let initialsEl = document.getElementById('acc-avatar-initials-fallback');
+  if (!initialsEl) {
+    initialsEl = document.createElement('div');
+    initialsEl.id = 'acc-avatar-initials-fallback';
+    initialsEl.style.cssText = 'width:72px;height:72px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:Syne,sans-serif;font-weight:700;color:var(--accent);font-size:1.1rem;';
+    avatarWrap.insertBefore(initialsEl, avatarImg);
+  }
+  initialsEl.textContent = initials;
+  initialsEl.style.display = currentUser.picture ? 'none' : 'flex';
+  if (currentUser.picture) avatarImg.onerror = () => { avatarImg.style.display = 'none'; initialsEl.style.display = 'flex'; };
+
+  document.getElementById('acc-username').value = currentUser.username || '';
+  document.getElementById('acc-email').value = currentUser.email || '';
+  document.getElementById('acc-current-pw-group').style.display = currentUser.hasPassword ? '' : 'none';
+  document.getElementById('acc-pw-title').textContent = currentUser.hasPassword ? 'Change Password' : 'Set a Password';
+  document.getElementById('acc-current-pw').value = '';
+  document.getElementById('acc-new-pw').value = '';
+  document.getElementById('acc-confirm-pw').value = '';
+  document.getElementById('acc-pw-err').classList.remove('show');
+  document.getElementById('acc-username-err').classList.remove('show');
+
+  const creatorSection = document.getElementById('acc-creator-section');
+  if (currentUser.isCreator) {
+    creatorSection.style.display = '';
+    const bioEl = document.getElementById('acc-bio');
+    bioEl.value = currentUser.bio || '';
+    document.getElementById('acc-bio-count').textContent = String((currentUser.bio||'').length);
+    bioEl.oninput = () => { document.getElementById('acc-bio-count').textContent = String(bioEl.value.length); };
+  } else {
+    creatorSection.style.display = 'none';
+  }
+}
+
+async function doChangeUsername() {
+  const input = document.getElementById('acc-username');
+  const errEl = document.getElementById('acc-username-err');
+  const btn = document.getElementById('acc-username-btn');
+  const username = input.value.trim();
+  errEl.classList.remove('show');
+  if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+    errEl.textContent = 'Username must be 3-20 characters: letters, numbers, and underscores only.';
+    errEl.classList.add('show');
+    return;
+  }
+  btn.disabled = true;
+  try {
+    const resp = await fetch('/api/account/username', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username }),
+    });
+    const data = await resp.json();
+    if (resp.ok && data.ok) {
+      currentUser = data.user;
+      localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+      showToast('✓ Username updated!', 'success');
+    } else {
+      errEl.textContent = data.error || 'Could not update username.';
+      errEl.classList.add('show');
+    }
+  } catch (e) {
+    errEl.textContent = 'Could not reach the server.';
+    errEl.classList.add('show');
+  }
+  btn.disabled = false;
+}
+
+async function doChangePassword() {
+  const currentPw = document.getElementById('acc-current-pw').value;
+  const newPw = document.getElementById('acc-new-pw').value;
+  const confirmPw = document.getElementById('acc-confirm-pw').value;
+  const errEl = document.getElementById('acc-pw-err');
+  const btn = document.getElementById('acc-pw-btn');
+  errEl.classList.remove('show');
+
+  if (newPw.length < 8) {
+    errEl.textContent = 'New password must be at least 8 characters.';
+    errEl.classList.add('show');
+    return;
+  }
+  if (newPw !== confirmPw) {
+    errEl.textContent = 'Passwords do not match.';
+    errEl.classList.add('show');
+    return;
+  }
+  if (currentUser.hasPassword && !currentPw) {
+    errEl.textContent = 'Enter your current password.';
+    errEl.classList.add('show');
+    return;
+  }
+
+  btn.disabled = true;
+  try {
+    const resp = await fetch('/api/account/password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentPassword: currentPw, newPassword: newPw }),
+    });
+    const data = await resp.json();
+    if (resp.ok && data.ok) {
+      currentUser.hasPassword = true;
+      localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+      document.getElementById('acc-current-pw').value = '';
+      document.getElementById('acc-new-pw').value = '';
+      document.getElementById('acc-confirm-pw').value = '';
+      document.getElementById('acc-current-pw-group').style.display = '';
+      document.getElementById('acc-pw-title').textContent = 'Change Password';
+      showToast('✓ Password updated!', 'success');
+    } else {
+      errEl.textContent = data.error || 'Could not update password.';
+      errEl.classList.add('show');
+    }
+  } catch (e) {
+    errEl.textContent = 'Could not reach the server.';
+    errEl.classList.add('show');
+  }
+  btn.disabled = false;
+}
+
+async function doChangeBio() {
+  const bioEl = document.getElementById('acc-bio');
+  const errEl = document.getElementById('acc-bio-err');
+  const btn = document.getElementById('acc-bio-btn');
+  errEl.classList.remove('show');
+  btn.disabled = true;
+  try {
+    const resp = await fetch('/api/account/bio', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bio: bioEl.value.trim() }),
+    });
+    const data = await resp.json();
+    if (resp.ok && data.ok) {
+      currentUser = data.user;
+      localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+      showToast('✓ Bio updated!', 'success');
+    } else {
+      errEl.textContent = data.error || 'Could not update bio.';
+      errEl.classList.add('show');
+    }
+  } catch (e) {
+    errEl.textContent = 'Could not reach the server.';
+    errEl.classList.add('show');
+  }
+  btn.disabled = false;
+}
+
+async function doUploadAvatar(file) {
+  if (!file) return;
+  showToast('Uploading photo…', 'success');
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    const upResp = await fetch('/api/upload/avatar', { method: 'POST', body: fd });
+    const upData = await upResp.json();
+    if (!upResp.ok || !upData.ok || !upData.url) {
+      showToast(upData.error || 'Photo upload failed.', 'error');
+      return;
+    }
+    const saveResp = await fetch('/api/account/picture', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ picture: upData.url }),
+    });
+    const saveData = await saveResp.json();
+    if (saveResp.ok && saveData.ok) {
+      currentUser = saveData.user;
+      localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+      setNavUser(currentUser);
+      renderAccountView();
+      showToast('✓ Profile picture updated!', 'success');
+    } else {
+      showToast(saveData.error || 'Could not save profile picture.', 'error');
+    }
+  } catch (e) {
+    showToast('Could not reach the server.', 'error');
+  }
+}
+
 // Alias for the footer "Admin" link (was calling an undefined function)
 function showAdminLogin() { openAdminLogin(); }
 
@@ -2481,7 +2785,7 @@ function setNavUser(user) {
   }
 }
 
-function showUserMenu() { showToast(`Signed in as ${currentUser.email}`,'success'); }
+function showUserMenu() { showAccount(); }
 
 async function signOut() {
   // Tell the server to clear the session cookie FIRST
